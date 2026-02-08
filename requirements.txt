@@ -1,0 +1,19 @@
+pymupdf4llm
+# Web & API
+fastapi
+uvicorn
+requests
+python-dotenv
+streamlit
+
+# AI & Processing
+openai
+pypdf
+tiktoken
+
+# Databases
+supabase
+pinecone-client
+
+# Text Splitting
+langchain-text-splitters
