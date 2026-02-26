@@ -18,3 +18,11 @@ pinecone-client
 
 # Text Splitting
 langchain-text-splitters
+
+#additional
+pydantic
+langgraph
+langchain
+supabase
+pinecone-client
+python-dotenv
