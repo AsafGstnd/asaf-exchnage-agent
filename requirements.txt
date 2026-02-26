@@ -1,3 +1,4 @@
+pytest
 pymupdf4llm
 # Web & API
 fastapi

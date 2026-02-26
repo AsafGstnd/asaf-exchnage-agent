@@ -1,6 +1,6 @@
 import os
 import pymupdf4llm
-from utils.db import supabase
+from utils.config import supabase
 
 BASE_DIR = "data\external_universities"
 

@@ -1,14 +1,12 @@
 import os
 import requests
 from dotenv import load_dotenv
+from .config import LLMOD_BASE_URL, LLMOD_CHAT_MODEL, LLMOD_EMBEDDING_MODEL
 
 load_dotenv()
 
-# Configuration from .env
-LLMOD_BASE_URL = os.getenv("LLMOD_BASE_URL")
+# Only API key from .env
 LLMOD_API_KEY = os.getenv("LLMOD_API_KEY")
-LLMOD_CHAT_MODEL = os.getenv("LLMOD_CHAT_MODEL", "o3-mini")
-LLMOD_EMBEDDING_MODEL = os.getenv("LLMOD_EMBEDDING_MODEL", "text-embedding-3-small")
 
 def llmod_chat(system_prompt: str, user_prompt: str, use_json: bool = False) -> str:
     """
