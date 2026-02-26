@@ -1,3 +1,4 @@
+
 # Virtual Environment
 venv/
 __pycache__/
@@ -5,3 +6,6 @@ __pycache__/
 
 # Secrets
 .env
+
+# Data folder (do not track university PDFs or extracted data)
+data/

@@ -102,7 +102,10 @@ def run_ingestion():
     # Bulk upload using upsert to avoid duplicates
     if all_records:
         try:
-            supabase.table("universities_requirements").upsert(all_records).execute()
+            supabase.table("universities_requirements").upsert(
+                all_records, 
+                on_conflict="name,country"
+            ).execute()
             print(f"\nSuccessfully ingested {len(all_records)} universities to Supabase (universities_requirements table).")
         except Exception as e:
             print(f"Database error: {e}")

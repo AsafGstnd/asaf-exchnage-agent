@@ -4,7 +4,7 @@ from data_pipeline.rag_embedding import chunk_pdf_with_headers
 from utils.config import BASE_DIR
 
 if __name__ == "__main__":
-    sample_pdf = os.path.join(BASE_DIR, 'taiwan', 'national_taiwan_university', 'sample.pdf')
+    sample_pdf = os.path.join(BASE_DIR, 'taiwan', 'national_taiwan_university', 'factsheet.pdf')
     print(sample_pdf)
     saved_path = save_text(sample_pdf)
     print(f"Saved record path: {saved_path}")

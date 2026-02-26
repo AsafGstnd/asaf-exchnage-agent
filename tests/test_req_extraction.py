@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     # Load the row from extracted_texts table by key
     from utils.config import supabase
-    response = supabase.table("extracted_texts").select("*").eq("country", country).eq("university", university).eq("file", file).execute()
+    response = supabase.table("extracted_texts_sample").select("*").eq("country", country).eq("university", university).eq("file", file).execute()
     row = response.data[0] if response and hasattr(response, 'data') and response.data else None
 
     if row:

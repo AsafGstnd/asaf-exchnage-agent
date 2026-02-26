@@ -48,17 +48,17 @@ def process_pdfs_and_embed():
     for row in rows:
         country = row.get("country", "")
         uni = row.get("university", "")
-        file = row.get("file", "")
+        file_name = row.get("file_name", "")
         try:
             chunks = chunk_pdf_with_headers(row)
         except Exception as e:
-            print(f"Error processing {file} ({uni}, {country}): {e}")
+            print(f"Error processing {file_name} ({uni}, {country}): {e}")
             continue
         for chunk in chunks:
             all_chunks.append({
                 "country": country,
                 "university": uni,
-                "file": file,
+                "file_name": file_name,
                 "text": chunk.page_content
             })
         chunk_texts = [chunk.page_content for chunk in chunks]
@@ -77,12 +77,12 @@ if __name__ == "__main__":
     metadatas = []
     for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
         # Create a unique ID for each chunk (could be improved for idempotency)
-        chunk_id = f"{chunk['country']}_{chunk['university']}_{chunk['file']}_{i}"
+        chunk_id = f"{chunk['country']}_{chunk['university']}_{chunk['file_name']}_{i}"
         vectors.append((chunk_id, embedding))
         metadatas.append({
             "country": chunk["country"],
             "university": chunk["university"],
-            "file": chunk["file"]
+            "file_name": chunk["file_name"]
         })
 
     if vectors:

@@ -16,8 +16,6 @@ class AgentState(TypedDict):
     user_iformation: dict
     user_requests: List[str]
     top_k: int
-    extracted_data_dict: dict
-    rag_factsheet_func: Any
     top_universities: list
     analysis: str
     request_count: int
@@ -44,9 +42,8 @@ def rank_node(state: AgentState):
 
 def analyze_node(state: AgentState):
     state["analysis"] = analyze_universities(
-        state.get("top_universities", []), # Uses empty list if not ranked yet
-        state["extracted_data_dict"],
-        state["rag_factsheet_func"]
+        state.get("top_universities", []),
+        state.get("universities_fit_text", None)
     )
     return state
 
@@ -102,7 +99,8 @@ class Supervisor:
     def run(self, user_input, request_count=1):
         # Only initialize user_input and request_count for the first request
         initial_state = {
-            "user_input": user_input,
+            "user_iformation": user_input,
+            "user_requests": [],
             "request_count": request_count,
             "valid_universities_list": [],
             "top_k": 5,
@@ -110,7 +108,7 @@ class Supervisor:
             "rag_factsheet_func": None,
             "top_universities": [],
             "analysis": "",
-            "llm_json_response": None
+            "universities_fit_text": []
         }
         # Run the LangGraph app
         result = self.app.invoke(initial_state)
@@ -130,7 +128,7 @@ class Supervisor:
             if not user_profile_dict:
                 raise ValueError("user_profile_dict is required for the first request!")
             payload = {
-                "user_input": user_profile_dict, # Set the JSON profile once
+                "user_iformation": user_profile_dict, # Set the JSON profile once
                 "user_requests": updated_requests,
                 "request_count": new_count,
                 "valid_universities_list": [], 
@@ -139,7 +137,7 @@ class Supervisor:
                 "rag_factsheet_func": None,
                 "top_universities": [],
                 "analysis": "",
-                "llm_json_response": None
+                "universities_fit_text": []
             }
         else:
             payload = {
