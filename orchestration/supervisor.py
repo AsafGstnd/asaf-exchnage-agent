@@ -96,25 +96,6 @@ class Supervisor:
         memory = MemorySaver()        
         self.app = workflow.compile(checkpointer=memory)
 
-    def run(self, user_input, request_count=1):
-        # Only initialize user_input and request_count for the first request
-        initial_state = {
-            "user_iformation": user_input,
-            "user_requests": [],
-            "request_count": request_count,
-            "valid_universities_list": [],
-            "top_k": 5,
-            "extracted_data_dict": {},
-            "rag_factsheet_func": None,
-            "top_universities": [],
-            "analysis": "",
-            "universities_fit_text": []
-        }
-        # Run the LangGraph app
-        result = self.app.invoke(initial_state)
-        # Return the final analysis from the finished state
-        return result["analysis"]
-    
     def run(self, new_chat_message: str, user_profile_dict: dict = None, thread_id="user_123"):        
         config = {"configurable": {"thread_id": thread_id}}
         current_memory = self.app.get_state(config).values        
