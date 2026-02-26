@@ -78,6 +78,8 @@ def get_structured_data(row):
         return None
 
 
+# we dont handle here 2 different factsheets of same university!!! and we should
+# either use only 1 or changing getstructured data to recieve multiple rows and here agg by univeristy name.
 def run_ingestion():
     all_records = []
     # Fetch all rows from extracted_texts table

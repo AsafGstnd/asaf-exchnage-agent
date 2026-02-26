@@ -22,12 +22,15 @@ def upsert_embeddings(vectors, metadatas=None, namespace=None):
         items.append(item)
     index.upsert(items=items, namespace=namespace)
 
-def query_embedding(query_vector, top_k=5, namespace=None, filter=None):
+def query_embedding(query, top_k=5, namespace=None, filter=None):
     """
     Query Pinecone for similar embeddings.
-    query_vector: embedding vector to search
+    query: string query to embed and search
     top_k: number of results
     namespace: Pinecone namespace (optional)
     filter: metadata filter (optional)
     """
+    # You need to embed the query string before querying Pinecone
+    from utils.llmod_client import embed_query
+    query_vector = embed_query(query)
     return index.query(vector=query_vector, top_k=top_k, namespace=namespace, filter=filter)

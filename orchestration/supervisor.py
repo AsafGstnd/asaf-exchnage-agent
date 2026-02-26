@@ -5,7 +5,7 @@ from typing import TypedDict, Any, List
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 
-from orchestration.specialists.ranker import rank_universities
+from orchestration.specialists.ranker import score_universities_with_llm, process_llm_scores
 from orchestration.specialists.analyzer import analyze_universities
 from orchestration.specialists.filter import filter_universities
 from utils import config 
@@ -21,6 +21,7 @@ class AgentState(TypedDict):
     top_universities: list
     analysis: str
     request_count: int
+    universities_fit_text:List[str]
 
 # 2. Define the Nodes
 def filter_node(state: AgentState):
@@ -31,11 +32,14 @@ def filter_node(state: AgentState):
 def rank_node(state: AgentState):
     preferences = state["user_iformation"].get("preferences", {})
     free_language_preferences = preferences.get("free_language_preferences", "")
-    state["top_universities"] = rank_universities(
+    llm_json_response = score_universities_with_llm(
         state["valid_universities_list"],
         free_language_preferences,
         state["top_k"]
     )
+    reasonings = [uni.get("reasoning", "") for uni in llm_json_response.get("scored_universities", [])]
+    state["universities_fit_text"] = reasonings
+    state["top_universities"] = process_llm_scores(llm_json_response, top_k=state["top_k"])
     return state
 
 def analyze_node(state: AgentState):
@@ -105,7 +109,8 @@ class Supervisor:
             "extracted_data_dict": {},
             "rag_factsheet_func": None,
             "top_universities": [],
-            "analysis": ""
+            "analysis": "",
+            "llm_json_response": None
         }
         # Run the LangGraph app
         result = self.app.invoke(initial_state)
@@ -133,7 +138,8 @@ class Supervisor:
                 "extracted_data_dict": {},
                 "rag_factsheet_func": None,
                 "top_universities": [],
-                "analysis": ""
+                "analysis": "",
+                "llm_json_response": None
             }
         else:
             payload = {
