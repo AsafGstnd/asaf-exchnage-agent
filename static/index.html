@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fez Exchange Agent</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+    textarea { width: 100%; height: 120px; padding: 0.5rem; font-family: monospace; font-size: 0.9rem; }
+    button { padding: 0.5rem 1.5rem; font-size: 1rem; cursor: pointer; background: #2563eb; color: white; border: none; border-radius: 6px; }
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .output { margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; white-space: pre-wrap; }
+    .error { color: #dc2626; }
+    .steps { margin-top: 1rem; }
+    .step { margin-bottom: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; }
+    .step-header { padding: 0.5rem 0.75rem; background: #f1f5f9; cursor: pointer; font-weight: 500; }
+    .step-body { padding: 0.75rem; font-size: 0.85rem; }
+    .step-body pre { margin: 0; overflow-x: auto; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <h1>University Exchange AI</h1>
+  <textarea id="prompt" placeholder='{"academic_profile": {"gpa": 85}, "preferences": {"free_language_preferences": "party vibe, social scene"}}'>{"academic_profile": {"gpa": 85}, "preferences": {"free_language_preferences": "party vibe, social scene"}}</textarea>
+  <p style="margin-top: 0.5rem;">
+    <button id="run" onclick="runAgent()">Run Agent</button>
+  </p>
+  <div id="result"></div>
+
+  <script>
+    async function runAgent() {
+      const prompt = document.getElementById('prompt').value.trim();
+      const btn = document.getElementById('run');
+      const result = document.getElementById('result');
+      if (!prompt) {
+        result.innerHTML = '<div class="output error">Please enter a prompt.</div>';
+        return;
+      }
+      btn.disabled = true;
+      result.innerHTML = '<div class="output">Running...</div>';
+      try {
+        const res = await fetch('/api/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          let html = '<div class="output"><strong>Response</strong><br><br>' + escapeHtml(data.response || '') + '</div>';
+          if (data.steps && data.steps.length) {
+            html += '<div class="steps"><strong>Execution Trace</strong>';
+            data.steps.forEach(s => {
+              html += '<div class="step"><div class="step-header">' + escapeHtml(s.module) + '</div><div class="step-body">';
+              html += '<strong>Prompt:</strong><pre>' + escapeHtml(JSON.stringify(s.prompt, null, 2)) + '</pre>';
+              html += '<strong>Response:</strong><pre>' + escapeHtml(JSON.stringify(s.response, null, 2)) + '</pre></div></div>';
+            });
+            html += '</div>';
+          }
+          result.innerHTML = html;
+        } else {
+          result.innerHTML = '<div class="output error">Error: ' + escapeHtml(data.error || 'Unknown error') + '</div>';
+        }
+      } catch (e) {
+        result.innerHTML = '<div class="output error">Request failed: ' + escapeHtml(e.message) + '</div>';
+      }
+      btn.disabled = false;
+    }
+    function escapeHtml(s) {
+      if (s == null) return '';
+      const div = document.createElement('div');
+      div.textContent = String(s);
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

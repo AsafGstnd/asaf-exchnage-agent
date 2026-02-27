@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import uvicorn
@@ -85,6 +86,11 @@ def execute_agent(request: ExecuteRequest):
         }
     except Exception as e:
         return {"status": "error", "error": str(e), "response": None, "steps": []}
+
+# Serve minimal UI at / (connects to /api when deployed on same host, e.g. Render)
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static")
+if os.path.exists(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
