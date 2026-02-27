@@ -26,3 +26,4 @@ langchain
 supabase
 pinecone-client
 python-dotenv
+slowapi

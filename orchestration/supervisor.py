@@ -1,6 +1,7 @@
 """
 Supervisor agent for orchestrating calls to other agents in the orchestration layer.
 """
+import json
 from typing import TypedDict, Any, List
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
@@ -25,17 +26,27 @@ class AgentState(TypedDict, total=False):
 # 2. Define the Nodes
 def filter_node(state: AgentState):
     filtered_result = filter_universities(state["user_iformation"])
+    universities = filtered_result.get("universities", [])
     step = {
         "module": "Filter",
         "prompt": {"action": "Query Supabase", "criteria": state["user_iformation"]},
-        "response": {"found_universities": len(filtered_result["universities"]), "traced_steps": filtered_result.get("traced_steps", [])}
+        "response": {"found_universities": len(universities), "traced_steps": filtered_result.get("traced_steps", [])}
     }
-    return {
-        "valid_universities_list": filtered_result["universities"],
+    result = {
+        "valid_universities_list": universities,
         "steps": (state.get("steps") or []) + [step]
     }
+    return result
 
 def rank_node(state: AgentState):
+    universities = state.get("valid_universities_list") or []
+    if not universities:
+        return {
+            "top_universities": [],
+            "universities_fit_text": [],
+            "analysis": "No universities match your criteria. Try looser filters (e.g. lower GPA, different availability).",
+            "steps": (state.get("steps") or [])
+        }
     preferences = state["user_iformation"].get("preferences", {})
     free_language_preferences = preferences.get("free_language_preferences", "")
     llm_json_response, rank_prompt = score_universities_with_llm(
@@ -58,29 +69,67 @@ def rank_node(state: AgentState):
     }
 
 def analyze_node(state: AgentState):
+    top_universities = state.get("top_universities") or []
+    if not top_universities:
+        return {
+            "analysis": "No universities to analyze.",
+            "steps": (state.get("steps") or [])
+        }
     analysis_results, analyze_steps = analyze_universities(
-        state.get("top_universities", []),
+        top_universities,
         state.get("universities_fit_text", None),
         return_steps=True
     )
-    formatted = _format_analysis_as_string(analysis_results)
+    user_prefs = (state.get("user_iformation") or {}).get("preferences", {}) or {}
+    prefs_str = str(user_prefs.get("free_language_preferences", ""))
+    exec_summary, synthesis_step = _synthesize_recommendations(analysis_results, prefs_str)
+    formatted = _format_analysis_as_string(analysis_results, exec_summary)
     return {
         "analysis": formatted,
-        "steps": (state.get("steps") or []) + analyze_steps
+        "steps": (state.get("steps") or []) + analyze_steps + ([synthesis_step] if synthesis_step else [])
     }
 
-def _format_analysis_as_string(analysis_results: list) -> str:
-    """Format analysis list into a human-readable string for API response."""
+def _synthesize_recommendations(analysis_results: list, user_prefs: str) -> tuple:
+    """Generate executive summary and alternatives via LLM. Returns (summary_text, step_dict or None)."""
+    if not analysis_results:
+        return ("", None)
+    try:
+        from utils.llmod_client import llmod_chat
+        names = [u.get("university_name", u.get("name", "?")) for u in analysis_results]
+        sys_prompt = "You are an expert study-abroad advisor. Write a brief, professional executive summary (2-3 sentences) and an 'Alternatives' note. Be specific and actionable."
+        user_prompt = f"""Top recommendations: {', '.join(names[:5])}. User preferences: "{user_prefs}".
+
+Output JSON: {{"executive_summary": "2-3 sentences", "alternatives_note": "1-2 sentences on backup options"}}"""
+        out = llmod_chat(sys_prompt, user_prompt, use_json=True)
+        data = json.loads(out)
+        summary = (data.get("executive_summary") or "") + "\n\n" + (data.get("alternatives_note") or "")
+        step = {"module": "Analyzer", "prompt": {"action": "Synthesize recommendations"}, "response": data}
+        return (summary.strip(), step)
+    except Exception:
+        return ("", None)
+
+def _format_analysis_as_string(analysis_results: list, exec_summary: str = "") -> str:
+    """Format analysis list into a human-readable string with Wikipedia enrichment."""
     if not analysis_results:
         return "No universities matched your criteria."
     parts = []
+    if exec_summary:
+        parts.append("--- Executive Summary ---")
+        parts.append(exec_summary)
+        parts.append("")
+        parts.append("--- Top Recommendations ---")
+        parts.append("")
     for i, uni in enumerate(analysis_results, 1):
         name = uni.get("university_name", uni.get("name", "Unknown"))
+        country = uni.get("country", "")
         reasoning = uni.get("general_fit_reasoning", "")
         logistics = uni.get("logistics_and_experience", {})
-        parts.append(f"**{i}. {name}**")
+        wiki = uni.get("wikipedia_summary", "")
+        parts.append(f"**{i}. {name}**" + (f" ({country})" if country else ""))
         if reasoning:
             parts.append(f"   Fit: {reasoning}")
+        if wiki:
+            parts.append(f"   About: {wiki}")
         if logistics:
             ac = logistics.get("academic", {})
             housing = logistics.get("housing_and_logistics", {})

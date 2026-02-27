@@ -12,7 +12,7 @@
     button { padding: 0.5rem 1.5rem; font-size: 1rem; cursor: pointer; background: #2563eb; color: white; border: none; border-radius: 6px; }
     button:hover { background: #1d4ed8; }
     button:disabled { background: #94a3b8; cursor: not-allowed; }
-    .output { margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; white-space: pre-wrap; }
+    .output { margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; }
     .error { color: #dc2626; }
     .steps { margin-top: 1rem; }
     .step { margin-bottom: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; }
@@ -23,13 +23,15 @@
 </head>
 <body>
   <h1>University Exchange AI</h1>
-  <textarea id="prompt" placeholder='{"academic_profile": {"gpa": 85}, "preferences": {"free_language_preferences": "party vibe, social scene"}}'>{"academic_profile": {"gpa": 85}, "preferences": {"free_language_preferences": "party vibe, social scene"}}</textarea>
+  <textarea id="prompt" placeholder='Try JSON or natural language: "85 GPA, party vibe in Europe, Jewish community"'>{"academic_profile": {"gpa": 85}, "preferences": {"free_language_preferences": "party vibe, social scene"}}</textarea>
   <p style="margin-top: 0.5rem;">
     <button id="run" onclick="runAgent()">Run Agent</button>
   </p>
   <div id="result"></div>
 
   <script>
+    const REQUEST_TIMEOUT_MS = 120000;
+
     async function runAgent() {
       const prompt = document.getElementById('prompt').value.trim();
       const btn = document.getElementById('run');
@@ -39,13 +41,17 @@
         return;
       }
       btn.disabled = true;
-      result.innerHTML = '<div class="output">Running...</div>';
+      result.innerHTML = '<div class="output">Agent is reasoning... (this may take 1-2 minutes)</div>';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
       try {
         const res = await fetch('/api/execute', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
+          body: JSON.stringify({ prompt }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         const data = await res.json();
         if (data.status === 'ok') {
           let html = '<div class="output"><strong>Response</strong><br><br>' + escapeHtml(data.response || '') + '</div>';
@@ -63,7 +69,8 @@
           result.innerHTML = '<div class="output error">Error: ' + escapeHtml(data.error || 'Unknown error') + '</div>';
         }
       } catch (e) {
-        result.innerHTML = '<div class="output error">Request failed: ' + escapeHtml(e.message) + '</div>';
+        const msg = e.name === 'AbortError' ? 'Request timed out. Try again.' : escapeHtml(e.message);
+        result.innerHTML = '<div class="output error">' + msg + ' <button onclick="runAgent()" style="margin-left:0.5rem;padding:0.25rem 0.75rem;cursor:pointer">Retry</button></div>';
       }
       btn.disabled = false;
     }

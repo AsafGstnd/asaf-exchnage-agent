@@ -10,9 +10,9 @@ SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 # --- Supabase Client Initialization ---
 try:
     from supabase import create_client
-    supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-except ImportError:
-    supabase = None  # supabase-py not installed
+    supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY else None
+except (ImportError, Exception):
+    supabase = None
 
 # --- Pinecone Setup (Vector/RAG) ---
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")

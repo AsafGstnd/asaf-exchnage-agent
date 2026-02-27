@@ -3,6 +3,7 @@ import json
 from pinecone_db.pinecone_client import query_embedding
 from utils.config import supabase
 from utils.llmod_client import llmod_chat
+from utils.web_enrichment import fetch_university_wikipedia
 
 def analyze_universities(top_universities, universities_fit_text=None, return_steps=False):
     """
@@ -77,9 +78,13 @@ def analyze_universities(top_universities, universities_fit_text=None, return_st
         {context_text}
         ---"""
 
-        # Call your LLM, ensuring it returns JSON
         extracted_logistics_json = llmod_chat(system_prompt, user_prompt, use_json=True)
-        logistics_and_experience_dict = json.loads(extracted_logistics_json)
+        try:
+            logistics_and_experience_dict = json.loads(extracted_logistics_json)
+        except json.JSONDecodeError:
+            logistics_and_experience_dict = {}
+        if not isinstance(logistics_and_experience_dict, dict):
+            logistics_and_experience_dict = {}
         if return_steps:
             steps.append({
                 "module": "Analyzer",
@@ -87,18 +92,22 @@ def analyze_universities(top_universities, universities_fit_text=None, return_st
                 "response": logistics_and_experience_dict
             })
        
-        # Query Supabase for requirements for this university (column is "name", not "university")
-        supa_resp = supabase.table("universities_requirements").select("*").eq("name", uni_name).execute()
-        eligibility_and_framework = supa_resp.data[0] if supa_resp and hasattr(supa_resp, 'data') and supa_resp.data else {}
-        
-        # Unpack all fields from supabase row into uni_analysis
+        supa_resp = supabase.table("universities_requirements").select("*").eq("name", uni_name).execute() if supabase else None
+        eligibility_and_framework = {}
+        if supa_resp and getattr(supa_resp, "data", None) and len(supa_resp.data) > 0:
+            eligibility_and_framework = supa_resp.data[0]
+
+        country = eligibility_and_framework.get("country", "")
+        wikipedia_summary = fetch_university_wikipedia(uni_name, country)
+
         uni_analysis = {
             "university_name": uni_name,
+            "country": country,
             **eligibility_and_framework,
             "logistics_and_experience": logistics_and_experience_dict,
-            "general_fit_reasoning": universities_fit_text[idx] if universities_fit_text and idx < len(universities_fit_text) else None
+            "general_fit_reasoning": universities_fit_text[idx] if universities_fit_text and idx < len(universities_fit_text) else None,
+            "wikipedia_summary": wikipedia_summary,
         }
-        
         analysis_results.append(uni_analysis)
     if return_steps:
         return analysis_results, steps

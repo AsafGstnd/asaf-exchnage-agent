@@ -1,31 +1,59 @@
 from utils.config import supabase
 
+def _safe_int(val, default=None, min_val=None, max_val=None):
+    try:
+        n = int(val)
+        if min_val is not None and n < min_val:
+            return default
+        if max_val is not None and n > max_val:
+            return default
+        return n
+    except (TypeError, ValueError):
+        return default
+
 def filter_universities(user_input):
     """
     Filters the universities_requirements table based on user input criteria.
     Returns:
         dict: { "universities": list[dict], "traced_steps": list[str] }
     """
-    academic = user_input.get("academic_profile", {})
-    language = user_input.get("language_profile", {})
-    availability = user_input.get("availability", {})
-    preferences = user_input.get("preferences", {})
+    if not supabase:
+        raise RuntimeError("Supabase not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.")
+
+    if not isinstance(user_input, dict):
+        return {"universities": [], "traced_steps": ["Invalid input: expected dict"]}
+
+    academic = user_input.get("academic_profile") or {}
+    language = user_input.get("language_profile") or {}
+    availability = user_input.get("availability") or {}
+    preferences = user_input.get("preferences") or {}
+    if not isinstance(academic, dict):
+        academic = {}
+    if not isinstance(language, dict):
+        language = {}
+    if not isinstance(availability, dict):
+        availability = {}
+    if not isinstance(preferences, dict):
+        preferences = {}
 
     query = supabase.table("universities_requirements").select("*")
     traced_steps = []
 
     # Academic filters
-    if academic.get("gpa") is not None:
-        query = query.lte("min_gpa", academic["gpa"])
-        traced_steps.append(f"Filtered by min_gpa <= {academic['gpa']}")
+    gpa = _safe_int(academic.get("gpa"), min_val=0, max_val=100) if academic.get("gpa") is not None else None
+    if gpa is not None:
+        query = query.lte("min_gpa", gpa)
+        traced_steps.append(f"Filtered by min_gpa <= {gpa}")
 
-    if academic.get("study_level", "").strip().lower() == "msc":
+    study_level = str(academic.get("study_level", "")).strip().lower() if academic.get("study_level") else ""
+    if study_level == "msc":
         query = query.eq("msc_allowed", True)
         traced_steps.append("Filtered by MSc allowed")
 
-    if academic.get("semesters_completed") is not None:
-        query = query.lte("min_semesters_completed", academic["semesters_completed"])
-        traced_steps.append(f"Filtered by min_semesters_completed <= {academic['semesters_completed']}")
+    semesters = _safe_int(academic.get("semesters_completed"), min_val=0) if academic.get("semesters_completed") is not None else None
+    if semesters is not None:
+        query = query.lte("min_semesters_completed", semesters)
+        traced_steps.append(f"Filtered by min_semesters_completed <= {semesters}")
 
     # Language filters
     user_langs = language.get("non_english_languages", [])
@@ -48,8 +76,8 @@ def filter_universities(user_input):
     s_end_d = availability.get("end_day", 31)
 
     if s_start_m and s_end_m:
-        student_start = (int(s_start_m), int(s_start_d))
-        student_end = (int(s_end_m), int(s_end_d))
+        student_start = (_safe_int(s_start_m, 1, 1, 12), _safe_int(s_start_d, 1, 1, 31))
+        student_end = (_safe_int(s_end_m, 12, 1, 12), _safe_int(s_end_d, 31, 1, 31))
         filtered = []
         for row in rows:
             has_sem = False
@@ -59,7 +87,9 @@ def filter_universities(user_input):
                 sm, sd, em, ed = sem.get("start_month"), sem.get("start_day", 1), sem.get("end_month"), sem.get("end_day", 31)
                 if sm and em:
                     has_sem = True
-                    if (int(sm), int(sd)) <= student_end and student_start <= (int(em), int(ed)):
+                    sm_i, sd_i = _safe_int(sm, 1, 1, 12), _safe_int(sd, 1, 1, 31)
+                    em_i, ed_i = _safe_int(em, 12, 1, 12), _safe_int(ed, 31, 1, 31)
+                    if sm_i and em_i and (sm_i, sd_i) <= student_end and student_start <= (em_i, ed_i):
                         overlap = True
                         break
             if not has_sem or overlap:

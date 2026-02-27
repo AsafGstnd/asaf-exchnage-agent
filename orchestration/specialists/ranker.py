@@ -34,11 +34,16 @@ def score_universities_with_llm(valid_universities_list, user_preferences, top_k
     """
     system_prompt = """You are an elite study-abroad placement API. Rank a list of eligible universities based on a student's preferences. Rely on your internal knowledge of global universities, cultures, and geography. Return ONLY valid JSON. No markdown, no explanations."""
 
-    # Format eligible universities as a list of dicts with name and country
+    empty_response = {"scored_universities": []}
+    if not valid_universities_list:
+        return (empty_response, {"empty_input": True}) if return_prompt else empty_response
+
     formatted_universities = [
         {"university_name": uni["name"], "country": uni["country"]}
-        for uni in valid_universities_list if uni.get("name") and uni.get("country")
+        for uni in valid_universities_list if isinstance(uni, dict) and uni.get("name") and uni.get("country")
     ]
+    if not formatted_universities:
+        return (empty_response, {"empty_input": True}) if return_prompt else empty_response
 
     user_prompt = f"""
     Eligible Universities:
@@ -91,7 +96,14 @@ def score_universities_with_llm(valid_universities_list, user_preferences, top_k
     """
 
     response_text = llmod_chat(system_prompt, user_prompt, use_json=True)
-    llm_json_response = json.loads(response_text)
+    try:
+        llm_json_response = json.loads(response_text)
+    except json.JSONDecodeError:
+        llm_json_response = {"scored_universities": []}
+    if not isinstance(llm_json_response, dict):
+        llm_json_response = {"scored_universities": []}
+    if "scored_universities" not in llm_json_response:
+        llm_json_response["scored_universities"] = []
     if return_prompt:
         return llm_json_response, {"system_prompt": system_prompt[:200] + "...", "user_prompt": user_prompt, "top_k": top_k}
     return llm_json_response
