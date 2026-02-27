@@ -1,10 +1,14 @@
 import os
 from pinecone import Pinecone
-from utils.config import PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME
+from utils.llmod_client import get_embedding
+from utils.config import PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, TOP_K_RESULTS
 
-# Initialize Pinecone client
-pc = Pinecone(api_key=PINECONE_API_KEY)
-index = pc.Index(PINECONE_INDEX_NAME)
+def _get_index():
+    if not PINECONE_API_KEY or not PINECONE_INDEX_NAME:
+        raise ValueError("Pinecone credentials missing. Check your .env/config.")
+    
+    pc = Pinecone(api_key=PINECONE_API_KEY)
+    return pc.Index(PINECONE_INDEX_NAME)
 
 def upsert_embeddings(vectors, metadatas=None, namespace=None):
     """
@@ -14,6 +18,7 @@ def upsert_embeddings(vectors, metadatas=None, namespace=None):
     namespace: Pinecone namespace (optional)
     """
     # Pinecone upsert expects list of dicts: {"id": ..., "values": ..., "metadata": ...}
+    index = _get_index()
     items = []
     for i, (id, embedding) in enumerate(vectors):
         item = {"id": id, "values": embedding}
@@ -22,7 +27,7 @@ def upsert_embeddings(vectors, metadatas=None, namespace=None):
         items.append(item)
     index.upsert(items=items, namespace=namespace)
 
-def query_embedding(query, top_k=5, namespace=None, filter=None):
+def query_embedding(query, top_k=TOP_K_RESULTS, namespace=None, filter=None):
     """
     Query Pinecone for similar embeddings.
     query: string query to embed and search
@@ -31,6 +36,10 @@ def query_embedding(query, top_k=5, namespace=None, filter=None):
     filter: metadata filter (optional)
     """
     # You need to embed the query string before querying Pinecone
-    from utils.llmod_client import embed_query
-    query_vector = embed_query(query)
-    return index.query(vector=query_vector, top_k=top_k, namespace=namespace, filter=filter)
+    index = _get_index()
+    query_vector = get_embedding(query)
+    return index.query(vector=query_vector, 
+                       top_k=top_k, 
+                       namespace=namespace, 
+                       filter=filter, 
+                       include_metadata=True)

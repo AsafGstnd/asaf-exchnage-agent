@@ -23,6 +23,7 @@ PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 BASE_DIR = "data/external_universities"
 CHUNK_SIZE = 2000  # characters per chunk
 CHUNK_OVERLAP = 300  # overlap between chunks
+TOP_K_RESULTS = 7  # For Pinecone queries
 
 LLMOD_BASE_URL = "https://api.llmod.ai"
 LLMOD_EMBEDDING_MODEL = "RPRTHPB-text-embedding-3-small"

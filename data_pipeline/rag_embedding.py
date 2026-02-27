@@ -23,25 +23,32 @@ def chunk_pdf_with_headers(row):
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
         separators=[
-            "\n# ",
-            "\n## ",
-            "\n\n",
-            "\n- ",
-            "\n",
-            ". ",
-            " ",
-            ""
+        "\n# ", "\n## ", "\n### ", # 1. Try Headers first
+        "\n\n",                     # 2. Try Paragraphs
+        "\n- ", "\n* ",             # 3. Try Bullet points (Keeps lists together!)
+        ". ",                       # 4. Try Sentences
+        "\n",                       # 5. Try Soft line breaks
+        " ",                        # 6. Try Words
+        ""                          # 7. Last resort
         ],
-        add_start_index=True
-    )
+        add_start_index=True # Stores the character position where each chunk starts within the original text.
+     )
     final_chunks = text_splitter.split_documents(header_splits)
+    # Each chunk's structure: 
+    # Document(
+    #   page_content="The minimum GPA is 3.0...", 
+    #   metadata={
+    #       "Header 1": "REQUIREMENTS",
+    #       "Header 2": "GPA",
+    #       "start_index": 1250
+    #   }
+    # )
     return final_chunks
 
-def process_pdfs_and_embed():
-    all_chunks = []
-    all_embeddings = []
 
-    # Fetch all rows from extracted_texts table
+def save_chunks():
+    """Chunk all extracted_texts and save to factsheets_chunks table in Supabase."""
+    all_chunks = []
     response = supabase.table("extracted_texts").select("*").execute()
     rows = response.data if response and hasattr(response, 'data') else []
     print(f"Found {len(rows)} records in extracted_texts table.")
@@ -49,44 +56,61 @@ def process_pdfs_and_embed():
         country = row.get("country", "")
         uni = row.get("university", "")
         file_name = row.get("file_name", "")
+        print(f"Chunking: {uni} ({country}) - {file_name}")
         try:
             chunks = chunk_pdf_with_headers(row)
         except Exception as e:
             print(f"Error processing {file_name} ({uni}, {country}): {e}")
             continue
-        for chunk in chunks:
-            all_chunks.append({
+        print(f"  -> {len(chunks)} chunks")
+        for i, chunk in enumerate(chunks):
+            print(f"    Saving chunk {i+1}/{len(chunks)}")
+            chunk_record = {
                 "country": country,
                 "university": uni,
                 "file_name": file_name,
-                "text": chunk.page_content
-            })
-        chunk_texts = [chunk.page_content for chunk in chunks]
-        if chunk_texts:
-            embeddings = batch_embed_texts(chunk_texts)
-            all_embeddings.extend(embeddings)
-    return all_chunks, all_embeddings
+                "chunk_index": i,
+                "text": chunk.page_content,
+                "headers": chunk.metadata
+            }
+            all_chunks.append(chunk_record)
+    if all_chunks:
+        supabase.table("factsheets_chunks").upsert(all_chunks).execute()
+        print(f"Saved {len(all_chunks)} chunks to factsheets_chunks table.")
+    else:
+        print("No chunks to save.")
+    return all_chunks
 
-
-if __name__ == "__main__":
-    chunks, embeddings = process_pdfs_and_embed()
-    print(f"Processed {len(chunks)} chunks and embeddings.")
-
-    # Prepare IDs and metadata for Pinecone upsert
+def embed_chunks():
+    """Embed all chunks from factsheets_chunks table and upsert to Pinecone."""
+    response = supabase.table("factsheets_chunks").select("*").execute()
+    rows = response.data if response and hasattr(response, 'data') else []
+    print(f"Found {len(rows)} chunks in factsheets_chunks table.")
+    if not rows:
+        print("No chunks to embed.")
+        return
+    chunk_texts = [row["text"] for row in rows]
+    embeddings = batch_embed_texts(chunk_texts)
     vectors = []
     metadatas = []
-    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
-        # Create a unique ID for each chunk (could be improved for idempotency)
-        chunk_id = f"{chunk['country']}_{chunk['university']}_{chunk['file_name']}_{i}"
+    for i, (row, embedding) in enumerate(zip(rows, embeddings)):
+        chunk_id = f"{row['country']}_{row['university']}_{row['file_name']}_{row.get('chunk_index', i)}"
         vectors.append((chunk_id, embedding))
         metadatas.append({
-            "country": chunk["country"],
-            "university": chunk["university"],
-            "file_name": chunk["file_name"]
+            "country": row["country"],
+            "university": row["university"],
+            "file_name": row["file_name"],
+            "headers": row["headers"]
         })
-
     if vectors:
         upsert_embeddings(vectors, metadatas=metadatas)
         print(f"Upserted {len(vectors)} embeddings to Pinecone.")
     else:
         print("No embeddings to upsert.")
+
+
+if __name__ == "__main__":
+    print("Step 1: Chunking and saving to factsheets_chunks table...")
+    save_chunks()
+    # print("Step 2: Embedding and upserting to Pinecone...")
+    # embed_chunks()

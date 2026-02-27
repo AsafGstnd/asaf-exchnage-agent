@@ -1,3 +1,13 @@
+CREATE TABLE IF NOT EXISTS public.factsheets_chunks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    country TEXT NOT NULL,
+    university TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    chunk_index INT NOT NULL,
+    text TEXT NOT NULL,
+    headers JSONB,
+    CONSTRAINT unique_chunk_per_file UNIQUE (country, university, file_name, chunk_index)
+);
 CREATE TABLE IF NOT EXISTS public.extracted_texts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     country TEXT NOT NULL,
