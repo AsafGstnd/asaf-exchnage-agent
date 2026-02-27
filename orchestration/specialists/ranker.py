@@ -21,15 +21,16 @@ def rank_universities(valid_universities_list, user_preferences, top_k=5):
         print("-------------------------------")
     return process_llm_scores(llm_json_response, top_k=top_k)
 
-def score_universities_with_llm(valid_universities_list, user_preferences, top_k=5):
+def score_universities_with_llm(valid_universities_list, user_preferences, top_k=5, return_prompt=False):
     """
     Sends ranking prompt to LLM, parses response, and returns ranked universities.
     Args:
         valid_universities_list (list): List of dicts with 'name' and 'country'.
         user_preferences (str): Student preferences as a string.
         top_k (int): Number of top universities to return.
+        return_prompt (bool): If True, return (llm_json_response, prompt_dict).
     Returns:
-        list[dict]: Ranked top k universities with scores and reasoning.
+        llm_json_response (or tuple if return_prompt)
     """
     system_prompt = """You are an elite study-abroad placement API. Rank a list of eligible universities based on a student's preferences. Rely on your internal knowledge of global universities, cultures, and geography. Return ONLY valid JSON. No markdown, no explanations."""
 
@@ -91,6 +92,8 @@ def score_universities_with_llm(valid_universities_list, user_preferences, top_k
 
     response_text = llmod_chat(system_prompt, user_prompt, use_json=True)
     llm_json_response = json.loads(response_text)
+    if return_prompt:
+        return llm_json_response, {"system_prompt": system_prompt[:200] + "...", "user_prompt": user_prompt, "top_k": top_k}
     return llm_json_response
 
 def process_llm_scores(llm_json_response, top_k=5):

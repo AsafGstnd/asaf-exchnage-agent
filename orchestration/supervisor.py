@@ -11,7 +11,7 @@ from orchestration.specialists.filter import filter_universities
 from utils import config 
 
 # 1. Define the State Schema
-class AgentState(TypedDict):
+class AgentState(TypedDict, total=False):
     valid_universities_list: list
     user_iformation: dict
     user_requests: List[str]
@@ -19,43 +19,87 @@ class AgentState(TypedDict):
     top_universities: list
     analysis: str
     request_count: int
-    universities_fit_text:List[str]
+    universities_fit_text: List[str]
+    steps: List[dict]
 
 # 2. Define the Nodes
 def filter_node(state: AgentState):
-    filtered_universities = filter_universities(state["user_iformation"])
-    state["valid_universities_list"] = filtered_universities
-    return state
+    filtered_result = filter_universities(state["user_iformation"])
+    step = {
+        "module": "Filter",
+        "prompt": {"action": "Query Supabase", "criteria": state["user_iformation"]},
+        "response": {"found_universities": len(filtered_result["universities"]), "traced_steps": filtered_result.get("traced_steps", [])}
+    }
+    return {
+        "valid_universities_list": filtered_result["universities"],
+        "steps": (state.get("steps") or []) + [step]
+    }
 
 def rank_node(state: AgentState):
     preferences = state["user_iformation"].get("preferences", {})
     free_language_preferences = preferences.get("free_language_preferences", "")
-    llm_json_response = score_universities_with_llm(
+    llm_json_response, rank_prompt = score_universities_with_llm(
         state["valid_universities_list"],
         free_language_preferences,
-        state["top_k"]
+        state["top_k"],
+        return_prompt=True
     )
     reasonings = [uni.get("reasoning", "") for uni in llm_json_response.get("scored_universities", [])]
-    state["universities_fit_text"] = reasonings
-    state["top_universities"] = process_llm_scores(llm_json_response, top_k=state["top_k"])
-    return state
+    top_universities = process_llm_scores(llm_json_response, top_k=state["top_k"])
+    step = {
+        "module": "Ranker",
+        "prompt": rank_prompt,
+        "response": {"scored_universities": llm_json_response.get("scored_universities", []), "top_universities": top_universities}
+    }
+    return {
+        "universities_fit_text": reasonings,
+        "top_universities": top_universities,
+        "steps": (state.get("steps") or []) + [step]
+    }
 
 def analyze_node(state: AgentState):
-    state["analysis"] = analyze_universities(
+    analysis_results, analyze_steps = analyze_universities(
         state.get("top_universities", []),
-        state.get("universities_fit_text", None)
+        state.get("universities_fit_text", None),
+        return_steps=True
     )
-    return state
+    formatted = _format_analysis_as_string(analysis_results)
+    return {
+        "analysis": formatted,
+        "steps": (state.get("steps") or []) + analyze_steps
+    }
+
+def _format_analysis_as_string(analysis_results: list) -> str:
+    """Format analysis list into a human-readable string for API response."""
+    if not analysis_results:
+        return "No universities matched your criteria."
+    parts = []
+    for i, uni in enumerate(analysis_results, 1):
+        name = uni.get("university_name", uni.get("name", "Unknown"))
+        reasoning = uni.get("general_fit_reasoning", "")
+        logistics = uni.get("logistics_and_experience", {})
+        parts.append(f"**{i}. {name}**")
+        if reasoning:
+            parts.append(f"   Fit: {reasoning}")
+        if logistics:
+            ac = logistics.get("academic", {})
+            housing = logistics.get("housing_and_logistics", {})
+            if ac.get("academic_summary_notes"):
+                parts.append(f"   Academic: {ac['academic_summary_notes']}")
+            if housing.get("logistics_summary_notes"):
+                parts.append(f"   Logistics: {housing['logistics_summary_notes']}")
+        parts.append("")
+    return "\n".join(parts).strip()
 
 # 3. Define the Routing Logic
 def choose_entry_point(state: AgentState) -> str:
     """
-    Analyzes the free-form user text to decide which task fits best using LLM, falls back to rules if LLM is unavailable.
+    Analyzes the free-form user text to decide which task fits best using LLM, falls back to filter if LLM is unavailable.
     """
-    # If this is the first user request, always start with filter
     if state.get("request_count", 1) == 1:
         return "filter"
-    user_text = state["user_iformation"].get("free_text", "")
+    requests = state.get("user_requests", [])
+    user_text = str(requests[-1]) if requests else state.get("user_iformation", {}).get("free_text", "")
     try:
         from utils.llmod_client import llmod_chat
         system_prompt = "You are an expert workflow router for a university exchange agent. Given a user's free-form input, decide which task fits best: 'filter', 'rank', or 'analyze'. Prefer small tweaks (rank) over big changes (filter), but do whatever is required. Respond ONLY with one of: filter, rank, analyze."
@@ -65,6 +109,7 @@ def choose_entry_point(state: AgentState) -> str:
             return task
     except Exception:
         pass
+    return "filter"
 
 # 4. Build the Supervisor Graph
 class Supervisor:
@@ -118,7 +163,8 @@ class Supervisor:
                 "rag_factsheet_func": None,
                 "top_universities": [],
                 "analysis": "",
-                "universities_fit_text": []
+                "universities_fit_text": [],
+                "steps": []
             }
         else:
             payload = {
@@ -127,4 +173,4 @@ class Supervisor:
             }
 
         result = self.app.invoke(payload, config=config)
-        return result["analysis"]
+        return {"analysis": result.get("analysis", ""), "steps": result.get("steps", [])}

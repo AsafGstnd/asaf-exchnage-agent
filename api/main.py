@@ -6,10 +6,7 @@ import uvicorn
 import os
 import json
 
-# 🟢 THE MAGIC SWAP: 
-# Right now, this uses the mock. When your real agent is ready, 
-# change this to: from orchestration.supervisor import Supervisor
-from orchestration.mock_supervisor import Supervisor
+from orchestration.supervisor import Supervisor
 
 app = FastAPI()
 agent = Supervisor()
@@ -45,18 +42,32 @@ def get_team_info():
 @app.get("/api/agent_info")
 def get_agent_info():
     return {
-        "description": "Multi-agent orchestration system for global university exchange placement.",
-        "purpose": "Filters, ranks, and analyzes universities based on constraints.",
-        "prompt_template": {"template": "A JSON string containing your profile."},
-        "prompt_examples": [{"prompt": "Example JSON", "full_response": "...", "steps": []}]
+        "description": "Multi-agent orchestration system for global university exchange placement. Uses Filter (Supabase), Ranker (LLM), and Analyzer (Pinecone RAG + LLM) to recommend universities.",
+        "purpose": "Filters universities by academic/language/availability criteria, ranks by preferences, and analyzes top matches for logistics and fit.",
+        "prompt_template": {
+            "template": '{"academic_profile": {"gpa": 85, "major": "Computer Science"}, "preferences": {"free_language_preferences": "social scene, party vibe"}, "language_profile": {}, "availability": {}}'
+        },
+        "prompt_examples": [
+            {
+                "prompt": '{"academic_profile": {"gpa": 85}, "preferences": {"free_language_preferences": "party vibe, easy to make friends"}}',
+                "full_response": "**1. CTU (Prague)**\n   Fit: Strong social scene, Erasmus presence...\n   Academic: 30 ECTS min...\n   Logistics: Housing lottery, ~$3.5k/semester.",
+                "steps": [
+                    {"module": "Filter", "prompt": {"action": "Query Supabase", "criteria": {}}, "response": {"found_universities": 12}},
+                    {"module": "Ranker", "prompt": {"top_k": 5}, "response": {"top_universities": ["CTU (Prague)", "DTU", "Politecnico di Milano"]}},
+                    {"module": "Analyzer", "prompt": {"target_university": "CTU (Prague)"}, "response": {"logistics_and_experience": {}}}
+                ]
+            }
+        ]
     }
 
 @app.get("/api/model_architecture")
 def get_architecture():
-    file_path = "architecture.png"
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Image not found")
-    return FileResponse(file_path, media_type="image/png")
+    base = os.path.dirname(os.path.abspath(__file__))
+    for name in ("architecture.png", "architecture_placeholder.png"):
+        file_path = os.path.join(base, "..", name)
+        if os.path.exists(file_path):
+            return FileResponse(file_path, media_type="image/png")
+    raise HTTPException(status_code=404, detail="Image not found")
 
 @app.post("/api/execute", response_model=ExecuteResponse)
 def execute_agent(request: ExecuteRequest):
@@ -64,10 +75,8 @@ def execute_agent(request: ExecuteRequest):
         try:
             user_profile = json.loads(request.prompt)
         except json.JSONDecodeError:
-            user_profile = {"free_text": request.prompt}
-        
-        result = agent.run(user_profile)
-        
+            user_profile = {"free_text": request.prompt, "preferences": {"free_language_preferences": request.prompt}}
+        result = agent.run(request.prompt, user_profile_dict=user_profile)
         return {
             "status": "ok",
             "error": None,

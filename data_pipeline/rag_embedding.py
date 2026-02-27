@@ -100,7 +100,8 @@ def embed_chunks():
             "country": row["country"],
             "university": row["university"],
             "file_name": row["file_name"],
-            "headers": row["headers"]
+            "headers": row["headers"],
+            "text": (row.get("text") or "")[:4000]  # Pinecone metadata limit; truncate if needed
         })
     if vectors:
         upsert_embeddings(vectors, metadatas=metadatas)
