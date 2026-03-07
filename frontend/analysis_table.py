@@ -44,7 +44,7 @@ with st.sidebar:
 
 # --- Main Logic ---
 if run_button:
-    with st.spinner("Analyzing universities..."):
+    with st.spinner("Agent is reasoning over universities, courses, and logistics..."):
         try:
             # ==========================================
             # 1. DATA FETCHING (Local vs Server)
@@ -119,6 +119,7 @@ if run_button:
                 agent_steps = data.get("steps", [])
                 
                 st.success(f"Analysis Complete! Found {len(universities)} matches.")
+                st.caption("Last run completed successfully.")
                 
                 # --- BUILD THE NICE TABLES ---
                 if universities:
