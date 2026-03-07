@@ -1,0 +1,919 @@
+{
+  "valid_universities_list": [
+    {
+      "name": "ECAM Strasbourg",
+      "country": "france"
+    },
+    {
+      "name": "University of Cyprus",
+      "country": "cyprus"
+    },
+    {
+      "name": "Technical University of Denmark (DTU)",
+      "country": "denmark"
+    },
+    {
+      "name": "Ecole Centrale Marseille",
+      "country": "france"
+    },
+    {
+      "name": "CentraleSupélec",
+      "country": "france"
+    },
+    {
+      "name": "Anhalt University of Applied Sciences",
+      "country": "germany"
+    },
+    {
+      "name": "Friedrich Schiller University Jena",
+      "country": "germany"
+    },
+    {
+      "name": "Leibniz Universität Hannover",
+      "country": "germany"
+    },
+    {
+      "name": "University of Erlangen-Nuremberg",
+      "country": "germany"
+    },
+    {
+      "name": "Technical University of Munich",
+      "country": "germany"
+    },
+    {
+      "name": "Politecnico di Milano",
+      "country": "italy"
+    },
+    {
+      "name": "Alexandru Ioan Cuza University of Iasi",
+      "country": "romania"
+    },
+    {
+      "name": "Universidad ORT Uruguay",
+      "country": "uruguay"
+    },
+    {
+      "name": "Politecnico di Torino",
+      "country": "italy"
+    },
+    {
+      "name": "Technical University of Berlin",
+      "country": "germany"
+    }
+  ],
+  "user_iformation": {
+    "academic_profile": {
+      "gpa": 3.2,
+      "major": "Computer Science",
+      "study_level": "bsc",
+      "semesters_completed": 4
+    },
+    "language_profile": {
+      "non_english_languages": [
+        "Spanish"
+      ],
+      "english_test_type": [
+        "TOEFL",
+        "IELTS"
+      ],
+      "english_test_level": "B2"
+    },
+    "availability": {
+      "start_month": 8,
+      "start_day": 15,
+      "end_month": 12,
+      "end_day": 31
+    },
+    "preferences": {
+      "must_be_erasmus": true,
+      "free_language_preferences": "I want a traditional, unified campus where it's easy to make friends, \n                    rather than commuting in a massive, overwhelming city.\n\n                    I'd love a place with cool museums, historical sites, good nightlife, \n                    and winters that aren't completely freezing.\n\n                    Financially, I need an affordable city where rent and groceries won't \n                    drain my savings. My absolute max budget is $9,000 for the semester."
+    }
+  },
+  "user_requests": [],
+  "top_k": 5,
+  "top_universities": [
+    "Alexandru Ioan Cuza University of Iasi",
+    "Friedrich Schiller University Jena",
+    "Universidad ORT Uruguay",
+    "CentraleSupélec",
+    "Anhalt University of Applied Sciences"
+  ],
+  "analysis": [
+    {
+      "university_name": "Alexandru Ioan Cuza University of Iasi",
+      "general_fit_reasoning": "Strasbourg offers a medium-sized, walkable city with strong historical core and museums (good for culture/nightlife) and winters that are chilly but not extreme. ECAM is a smaller engineering school with a more unified, campus-like student experience (easy to make friends) but not a massive Erasmus party hub. Estimated semester cost: ~$6,000 (Western/Southern Europe typical), within your $9k cap.",
+      "requirements": {
+        "name": "Alexandru Ioan Cuza University of Iasi",
+        "country": "romania",
+        "min_gpa": null,
+        "non_english_languages": [],
+        "english_test_type": [],
+        "english_test_level": null,
+        "english_only_possible": true,
+        "test_required": false,
+        "waiver_available": false,
+        "restricted_majors": [],
+        "msc_allowed": true,
+        "min_semesters_completed": null,
+        "fall_semester": {
+          "end_day": null,
+          "end_month": null,
+          "start_day": null,
+          "start_month": null
+        },
+        "spring_semester": {
+          "end_day": null,
+          "end_month": null,
+          "start_day": null,
+          "start_month": null
+        },
+        "erasmus_available": true
+      },
+      "logistics": {
+        "academic": {
+          "min_credits_required": null,
+          "max_credits_allowed": null,
+          "instruction_languages": "Romanian, English, French",
+          "grading_system_summary": null,
+          "academic_summary_notes": "Many courses are taught in Romanian while certain bachelor and master specializations are taught entirely in English or French; Romanian courses are often supplemented by English tutorials where international students receive supervision and can be examined in English."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": null,
+          "housing_details": "University offers student residences (e.g., residence C5) and students must provide an accommodation contract for campus housing or certified rental/landlord declaration for private accommodation when registering.",
+          "university_sponsors_visa": null,
+          "estimated_visa_processing_weeks": null,
+          "mandatory_insurance_required": true,
+          "medical_and_insurance_details": "Proof of health insurance (EHIC or private) is required for immigration procedures and foreign citizens over 26 must have health insurance for residence extension; a medical certificate stating 'clinic sanatos' is also required and can be obtained at Titu Maiorescu Campus, C8 Hostel, room 1.",
+          "currency": "RON",
+          "estimated_housing_cost_per_month": null,
+          "estimated_living_cost_per_month": null,
+          "logistics_summary_notes": "Students must register with the General Inspectorate for Immigration in Iași submitting various documents (acceptance letter, ID, proof of accommodation, insurance, medical certificate); some registrations/documents are issued the same day and registration should be done within 30–60 days of arrival."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": true,
+          "orientation_is_mandatory": null,
+          "pre_semester_language_course_available": true,
+          "language_course_details": "A Romanian language course is offered but is only held if at least 10 students enroll and interest is queried during the orientation meeting.",
+          "integration_summary_notes": "An orientation meeting and an Erasmus academic coordinator provide guidance; tutorials and individual meetings allow international students to receive supervision and be examined or submit assignments in English."
+        }
+      }
+    },
+    {
+      "university_name": "Friedrich Schiller University Jena",
+      "general_fit_reasoning": "University of Cyprus sits on a compact campus near Nicosia, giving a relatively unified student bubble and easier social integration; Nicosia offers historical sites and mild Mediterranean winters. Nightlife exists but is smaller than big European hubs. Estimated semester cost: ~$6,000 (Southern Europe tail), comfortably under $9k.",
+      "requirements": {
+        "name": "Friedrich Schiller University Jena",
+        "country": "germany",
+        "min_gpa": null,
+        "non_english_languages": [
+          "German"
+        ],
+        "english_test_type": [],
+        "english_test_level": null,
+        "english_only_possible": false,
+        "test_required": false,
+        "waiver_available": false,
+        "restricted_majors": [
+          "Medicine",
+          "Dentistry",
+          "Pharmacy"
+        ],
+        "msc_allowed": true,
+        "min_semesters_completed": 4,
+        "fall_semester": {
+          "end_day": 31,
+          "end_month": 3,
+          "start_day": 1,
+          "start_month": 10
+        },
+        "spring_semester": {
+          "end_day": 30,
+          "end_month": 9,
+          "start_day": 1,
+          "start_month": 4
+        },
+        "erasmus_available": true
+      },
+      "logistics": {
+        "academic": {
+          "min_credits_required": null,
+          "max_credits_allowed": null,
+          "instruction_languages": null,
+          "grading_system_summary": null,
+          "academic_summary_notes": "FSU Jena uses the ECTS system and the EU standard is 30 ECTS per semester; guest students may choose courses across most fields (except Medicine, Dentistry and Pharmacy) and receive a Transcript of Records after each semester."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": null,
+          "housing_details": "Student housing is in high demand and finding accommodation can be difficult; students should apply online via the Studentenwerk housing service and respect deadlines (15 July for winter/full year, 15 January for summer).",
+          "university_sponsors_visa": false,
+          "estimated_visa_processing_weeks": 6,
+          "mandatory_insurance_required": true,
+          "medical_and_insurance_details": "German public health insurance is mandatory and the International Office does not accept private/travel insurances; EU health cards/forms may be accepted if valid, and health insurance is estimated at 500 per semester for non-EU students.",
+          "currency": "EUR",
+          "estimated_housing_cost_per_month": null,
+          "estimated_living_cost_per_month": null,
+          "logistics_summary_notes": "Semester contribution is 190 (includes regional transport); tuition fee is 0 and estimated accommodation cost is listed as 2700 per semester; enrolment details and orientation week dates are communicated in the admission letter."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": true,
+          "orientation_is_mandatory": false,
+          "pre_semester_language_course_available": null,
+          "language_course_details": "The FSU Language Centre offers optional German and other language courses (20 per semester) from beginner to advanced to help international students improve language skills.",
+          "integration_summary_notes": "FSU Jena offers an Orientation Week before lectures and provides preparation workshops and mentoring for nominated students; there are many international student groups and language tandems available."
+        }
+      }
+    },
+    {
+      "university_name": "Universidad ORT Uruguay",
+      "general_fit_reasoning": "DTU has a strong enclosed campus (Lyngby) with legendary campus bars and very active student life — excellent for making friends. Copenhagen gives world-class museums and nightlife but winters are colder and cost of living is high. Estimated semester cost: ~$9,500 (Northern Europe high), which exceeds or pushes your $9k comfort threshold.",
+      "requirements": {
+        "name": "Universidad ORT Uruguay",
+        "country": "uruguay",
+        "min_gpa": null,
+        "non_english_languages": [],
+        "english_test_type": [],
+        "english_test_level": null,
+        "english_only_possible": true,
+        "test_required": false,
+        "waiver_available": false,
+        "restricted_majors": [],
+        "msc_allowed": false,
+        "min_semesters_completed": null,
+        "fall_semester": {
+          "end_day": null,
+          "end_month": null,
+          "start_day": null,
+          "start_month": null
+        },
+        "spring_semester": {
+          "end_day": null,
+          "end_month": null,
+          "start_day": null,
+          "start_month": null
+        },
+        "erasmus_available": true
+      },
+      "logistics": {
+        "academic": {
+          "min_credits_required": null,
+          "max_credits_allowed": null,
+          "instruction_languages": "Spanish, English",
+          "grading_system_summary": null,
+          "academic_summary_notes": "Offers a Spanish language course for incoming students and a variety of English-taught courses. The Student Exchange Office manages around 340 incoming/outgoing students yearly and maintains 129 partner institutions."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": null,
+          "housing_details": null,
+          "university_sponsors_visa": null,
+          "estimated_visa_processing_weeks": null,
+          "mandatory_insurance_required": null,
+          "medical_and_insurance_details": null,
+          "currency": "UYU",
+          "estimated_housing_cost_per_month": null,
+          "estimated_living_cost_per_month": null,
+          "logistics_summary_notes": "Universidad ORT Uruguay has two campuses with extensive facilities, libraries, and campus-wide Wi-Fi. The factsheet does not provide details about housing availability, visa sponsorship, processing times, or insurance requirements."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": null,
+          "orientation_is_mandatory": null,
+          "pre_semester_language_course_available": true,
+          "language_course_details": "Spanish language course offered to incoming students; also a variety of English-taught courses available.",
+          "integration_summary_notes": "The Student Exchange Office provides management and support for mobility programs. A Spanish course is offered to incoming students, but the factsheet does not explicitly mention a buddy program or mandatory orientation."
+        }
+      }
+    },
+    {
+      "university_name": "CentraleSupélec",
+      "general_fit_reasoning": "Centrale Marseille is in a large Mediterranean port city—excellent museums, historical neighborhoods, nightlife and mild winters. Campus life is less of an enclosed college-town bubble (more urban/integrated), so making friends requires more initiative. Estimated semester cost: ~$6,000 (Western/Southern Europe), under $9k.",
+      "requirements": {
+        "name": "CentraleSupélec",
+        "country": "france",
+        "min_gpa": null,
+        "non_english_languages": [
+          "French"
+        ],
+        "english_test_type": [],
+        "english_test_level": null,
+        "english_only_possible": false,
+        "test_required": false,
+        "waiver_available": false,
+        "restricted_majors": [],
+        "msc_allowed": false,
+        "min_semesters_completed": 4,
+        "fall_semester": {
+          "end_day": null,
+          "end_month": 1,
+          "start_day": null,
+          "start_month": 9
+        },
+        "spring_semester": {
+          "end_day": null,
+          "end_month": 6,
+          "start_day": null,
+          "start_month": 2
+        },
+        "erasmus_available": true
+      },
+      "logistics": {
+        "academic": {
+          "min_credits_required": 15,
+          "max_credits_allowed": 30,
+          "instruction_languages": "French and English (most courses, especially Fall and 3rd-year, are taught in French)",
+          "grading_system_summary": "Scale 0-20 with minimum passing grade 10 for credit transfer.",
+          "academic_summary_notes": "Regular courseload is 30 ECTS/semester; exchange students must take 20 ECTS/semester if coming for a full year or 15 ECTS/semester for 2nd-year exchanges."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": false,
+          "housing_details": "Limited on-campus housing; applications open after admission; campus residences include Césal (Paris-Saclay), Residence Belle Fontaine (Rennes) and Residence Edouard Branly (Metz).",
+          "university_sponsors_visa": false,
+          "estimated_visa_processing_weeks": null,
+          "mandatory_insurance_required": true,
+          "medical_and_insurance_details": "Health insurance is mandatory; EU students use EHIC and non-EU students can enroll in French Social Security upon arrival; comprehensive coverage for lodging, liability and belongings is required.",
+          "currency": "EUR",
+          "estimated_housing_cost_per_month": "Paris-Saclay: 400-750, Rennes: 350-450, Metz: 350-450",
+          "estimated_living_cost_per_month": "700 (estimated budget for full-year mobility, includes accommodation)",
+          "logistics_summary_notes": "Students are responsible for securing and paying for visas; limited campus housing available and health insurance is mandatory for all students."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": true,
+          "orientation_is_mandatory": null,
+          "pre_semester_language_course_available": true,
+          "language_course_details": "Intensive French classes available at Cavilam (Alliance Française) prior to the semester; admitted double-degree students invited to a pre-programme summer school focusing on French, mathematics and physics.",
+          "integration_summary_notes": "Orientation sessions are offered each semester and a summer school is available for double-degree students; no buddy programme is mentioned."
+        }
+      }
+    },
+    {
+      "university_name": "Anhalt University of Applied Sciences",
+      "general_fit_reasoning": "CentraleSupélec (Saclay/Gif region) offers an elite, enclosed campus culture that facilitates friend-making and strong student organizations (more 'closed' grande école bubble). Proximity to Paris gives world-class museums, nightlife and cultural sites. Costs near Paris are higher than provincial France—estimated semester cost: ~$8,500–$9,000 (Western Europe, Paris premium), near your maximum.",
+      "requirements": {
+        "name": "Anhalt University of Applied Sciences",
+        "country": "germany",
+        "min_gpa": null,
+        "non_english_languages": [],
+        "english_test_type": [],
+        "english_test_level": null,
+        "english_only_possible": true,
+        "test_required": false,
+        "waiver_available": false,
+        "restricted_majors": [],
+        "msc_allowed": true,
+        "min_semesters_completed": null,
+        "fall_semester": {
+          "end_day": 7,
+          "end_month": 2,
+          "start_day": 1,
+          "start_month": 10
+        },
+        "spring_semester": {
+          "end_day": 7,
+          "end_month": 8,
+          "start_day": 1,
+          "start_month": 4
+        },
+        "erasmus_available": true
+      },
+      "logistics": {
+        "academic": {
+          "min_credits_required": null,
+          "max_credits_allowed": 30,
+          "instruction_languages": "English, German (depending on program and term)",
+          "grading_system_summary": "ECTS is used (1 academic year = 60 ECTS, 1 semester = 30 ECTS); grading scheme and grade conversion table available online.",
+          "academic_summary_notes": "Students typically take approximately 30 ECTS per semester; minimum number of credits must be confirmed with the home university."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": null,
+          "housing_details": "Studentenwerk Halle offers student residences on campuses in Bernburg, Dessau and Köthen; see www.studentenwerk-halle.de or contact Tel. +49 3496 67 6424.",
+          "university_sponsors_visa": null,
+          "estimated_visa_processing_weeks": null,
+          "mandatory_insurance_required": true,
+          "medical_and_insurance_details": "ERASMUS students must bring an EHIC; non-EU students should consult the university website; statutory student health insurance is approx. 135 EUR/month.",
+          "currency": "EUR",
+          "estimated_housing_cost_per_month": "250 - 450",
+          "estimated_living_cost_per_month": "803 - 920",
+          "logistics_summary_notes": "Approximate total monthly costs are ~803-920 EUR including accommodation (250-450 EUR); non-EU students may need a visa and/or residence permit and must pay related fees."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": null,
+          "orientation_is_mandatory": null,
+          "pre_semester_language_course_available": null,
+          "language_course_details": "Students from partner institutions can submit a language certificate provided by the sending institution.",
+          "integration_summary_notes": "No explicit information on buddy or mandatory orientation programs in the factsheet; language certificates from the home institution are accepted."
+        }
+      }
+    }
+  ],
+  "request_count": 1,
+  "universities_fit_text": [
+    "Strasbourg offers a medium-sized, walkable city with strong historical core and museums (good for culture/nightlife) and winters that are chilly but not extreme. ECAM is a smaller engineering school with a more unified, campus-like student experience (easy to make friends) but not a massive Erasmus party hub. Estimated semester cost: ~$6,000 (Western/Southern Europe typical), within your $9k cap.",
+    "University of Cyprus sits on a compact campus near Nicosia, giving a relatively unified student bubble and easier social integration; Nicosia offers historical sites and mild Mediterranean winters. Nightlife exists but is smaller than big European hubs. Estimated semester cost: ~$6,000 (Southern Europe tail), comfortably under $9k.",
+    "DTU has a strong enclosed campus (Lyngby) with legendary campus bars and very active student life — excellent for making friends. Copenhagen gives world-class museums and nightlife but winters are colder and cost of living is high. Estimated semester cost: ~$9,500 (Northern Europe high), which exceeds or pushes your $9k comfort threshold.",
+    "Centrale Marseille is in a large Mediterranean port city—excellent museums, historical neighborhoods, nightlife and mild winters. Campus life is less of an enclosed college-town bubble (more urban/integrated), so making friends requires more initiative. Estimated semester cost: ~$6,000 (Western/Southern Europe), under $9k.",
+    "CentraleSupélec (Saclay/Gif region) offers an elite, enclosed campus culture that facilitates friend-making and strong student organizations (more 'closed' grande école bubble). Proximity to Paris gives world-class museums, nightlife and cultural sites. Costs near Paris are higher than provincial France—estimated semester cost: ~$8,500–$9,000 (Western Europe, Paris premium), near your maximum.",
+    "Anhalt UAS is in smaller towns with campus-like, close-knit student life (great for making friends) and very low costs. Cultural offerings are more modest than big cities but there are niche museums (e.g., Bauhaus in Dessau). Winters are cooler but not extreme. Estimated semester cost: ~$4,000–$5,000 (Germany, small-town outlier) — very affordable.",
+    "Jena is a genuine university town with a compact, student-centered feel — ideal for a unified campus experience and easy friend-making. Good regional culture, museums and manageable nightlife; winters are colder but not extreme. Estimated semester cost: ~$3,500–$4,500 (Eastern/cheaper German city), very budget friendly relative to your $9k cap.",
+    "Hannover combines a sizable student population with campus pockets but is more of a mid-size city (moderate ease of meeting people). Cultural amenities and museums exist, winters moderate-cold. Estimated semester cost: ~$5,500 (Western Europe/Germany average), comfortably under $9k.",
+    "Erlangen (with nearby Nuremberg) is a classic German student city with strong campus feel in Erlangen, lively student societies and an approachable social scene—good for making friends. The region offers museums, historical architecture and decent nightlife; winters are moderate. Estimated semester cost: ~$5,500–$6,000, under your $9k limit.",
+    "TUM has strong campus elements (Garching) but also a big-city Munich presence; it’s social and well connected to student groups. Munich offers world-class museums, historic sites and nightlife, but winters are colder than Mediterranean options and cost of living is high. Estimated semester cost: ~$8,000–$9,000 (upper Western Europe), near your ceiling.",
+    "Polimi is an Erasmus/ international nightlife magnet with outstanding museums and cultural life in Milan, but it is decentralized within a large metropolis rather than a single unified residential campus (less ideal for your desire for a compact campus). Winters are mild-to-cool. Estimated semester cost: ~$6,500 (Western Europe/Milan), under $9k.",
+    "Iasi is a textbook student city with a compact, social campus culture—excellent for making friends and immersive campus life. Rich historical sites, museums and a lively student nightlife; winters are colder than Mediterranean but generally tolerable. Estimated semester cost: ~$2,500–$3,500 (Eastern Europe low), well below your $9k cap.",
+    "ORT in Montevideo offers an urban-but-manageable campus feel in a mid-sized coastal capital with good cultural life, museums and relaxed nightlife; southern hemisphere winters are mild. Costs in Uruguay are comparatively low for an exchange. Estimated semester cost: ~$4,000 (Latin America), comfortably within budget.",
+    "PoliTO is in Torino, a culturally rich city with excellent museums and history and more of a cohesive student city feel than Milan—better aligned with a traditional campus desire though still urban. Nightlife is good; winters can be cool. Estimated semester cost: ~$5,500–$6,000 (Western/Southern Europe), under $9k.",
+    "TU Berlin is embedded in a sprawling global city (big commuter feel) — excellent museums, nightlife and culture but not a single unified residential campus, so it’s less aligned with your desire for an enclosed college-town. Winters are moderate. Estimated semester cost: ~$6,000 (Western Europe/Berlin), within your $9k budget."
+  ],
+  "steps": [
+    {
+      "module": "Filter",
+      "prompt": {
+        "action": "Query Supabase",
+        "criteria": {
+          "academic_profile": {
+            "gpa": 3.2,
+            "major": "Computer Science",
+            "study_level": "bsc",
+            "semesters_completed": 4
+          },
+          "language_profile": {
+            "non_english_languages": [
+              "Spanish"
+            ],
+            "english_test_type": [
+              "TOEFL",
+              "IELTS"
+            ],
+            "english_test_level": "B2"
+          },
+          "availability": {
+            "start_month": 8,
+            "start_day": 15,
+            "end_month": 12,
+            "end_day": 31
+          },
+          "preferences": {
+            "must_be_erasmus": true,
+            "free_language_preferences": "I want a traditional, unified campus where it's easy to make friends, \n                    rather than commuting in a massive, overwhelming city.\n\n                    I'd love a place with cool museums, historical sites, good nightlife, \n                    and winters that aren't completely freezing.\n\n                    Financially, I need an affordable city where rent and groceries won't \n                    drain my savings. My absolute max budget is $9,000 for the semester."
+          }
+        }
+      },
+      "response": {
+        "found_universities": 15,
+        "traced_steps": [
+          "Filtered by min_gpa <= 3.2 (or no GPA requirement)",
+          "Filtered by min_semesters <= 4 (or no semester requirement)",
+          "Filtered by Erasmus availability",
+          "Filtered by availability: 8/15 to 12/31",
+          "Filtered by English test: ['toefl', 'ielts'] CEFR >= B2",
+          "Excluded restricted major: Computer Science",
+          "Filtered by language match: ['Spanish']",
+          "Queried universities_requirements table"
+        ]
+      }
+    },
+    {
+      "module": "Ranker",
+      "prompt": {
+        "llm_prompt": {
+          "system_prompt": "You are an elite study-abroad placement API. Rank a list of eligible universities based on a student's preferences. Rely on your internal knowledge of global universities, cultures, and geography. Ret...",
+          "user_prompt": "\n    Eligible Universities:\n    [\n  {\n    \"university_name\": \"ECAM Strasbourg\",\n    \"country\": \"france\"\n  },\n  {\n    \"university_name\": \"University of Cyprus\",\n    \"country\": \"cyprus\"\n  },\n  {\n    \"university_name\": \"Technical University of Denmark (DTU)\",\n    \"country\": \"denmark\"\n  },\n  {\n    \"university_name\": \"Ecole Centrale Marseille\",\n    \"country\": \"france\"\n  },\n  {\n    \"university_name\": \"CentraleSupélec\",\n    \"country\": \"france\"\n  },\n  {\n    \"university_name\": \"Anhalt University of Applied Sciences\",\n    \"country\": \"germany\"\n  },\n  {\n    \"university_name\": \"Friedrich Schiller University Jena\",\n    \"country\": \"germany\"\n  },\n  {\n    \"university_name\": \"Leibniz Universität Hannover\",\n    \"country\": \"germany\"\n  },\n  {\n    \"university_name\": \"University of Erlangen-Nuremberg\",\n    \"country\": \"germany\"\n  },\n  {\n    \"university_name\": \"Technical University of Munich\",\n    \"country\": \"germany\"\n  },\n  {\n    \"university_name\": \"Politecnico di Milano\",\n    \"country\": \"italy\"\n  },\n  {\n    \"university_name\": \"Alexandru Ioan Cuza University of Iasi\",\n    \"country\": \"romania\"\n  },\n  {\n    \"university_name\": \"Universidad ORT Uruguay\",\n    \"country\": \"uruguay\"\n  },\n  {\n    \"university_name\": \"Politecnico di Torino\",\n    \"country\": \"italy\"\n  },\n  {\n    \"university_name\": \"Technical University of Berlin\",\n    \"country\": \"germany\"\n  }\n]\n\n    Social Media Sentiment Table:\n    \n| University | Primary Social Vibe & Internet Sentiment | Overall Social Level |\n| :--- | :--- | :--- |\n| ITESM Monterrey | Massive Greek/Club life, wealthy international bubble, huge events. | High |\n| University of Oregon | Classic American state school, massive sports/tailgating, frat culture. | High |\n| Politecnico di Milano | Massive Erasmus hub, huge international club nights, high ESN traffic. | High |\n| Universidad de Palermo | Trendy, design-focused, huge international LatAm footprint, urban. | High |\n| McGill University | Work hard / party hard, deeply integrated into Montreal nightlife. | High |\n| Concordia University | Relaxed, urban, very social downtown campus, artsy vibe. | High |\n| CTU (Prague) | Erasmus goldmine, cheap nightlife, highly social international crowd. | High |\n| DTU | Legendary Friday campus bars, very active Scandinavian student life. | High |\n| HEC / Ecole Polytechnique | Elite enclosed campus bubbles, massive private galas and BDE parties. | High (Closed) |\n| UConn | Big sports culture, rural campus but highly active internal party scene. | High |\n| NTU / SKKU | Massive traditional campus festivals, huge club cultures, highly connected. | High |\n| Cornell University | Intense academics mixed with massive Greek life; \"Work hard, play hard.\" | Medium/High |\n| TUM / TU Berlin | Rigorous tech schools, but saved by world-class city nightlife and Erasmus. | Medium/High |\n| UBC / U of Toronto | Huge traffic, but criticized as \"commuter schools.\" Social life requires effort. | Medium |\n| RWTH Aachen / KIT | Male-dominated engineering, brutal exams, good local pubs but heavy stress. | Medium |\n| Carnegie Mellon (CMU) | Quirky/nerdy culture, high Reddit traffic about \"stress culture\", low partying. | Low/Medium |\n| Tsinghua / Peking | Elite, hyper-competitive (\"involution\"). Huge clubs, but intense pressure. | Low/Medium |\n| KAIST / POSTECH / USTC | Hardcore STEM pressure cookers. Very little party traffic, heavy lab focus. | Low |\n| EPFL | Famous for high failure rates; social life takes a deep backseat to studying. | Low |\n| Academia Sinica | Pure research institute, mostly post-grads, almost zero traditional campus life. | Lowest |\n\n    \n    Reference Data for `financial_fit` (Global Semester Pure Cost - $0 Tuition):\n    \n| Region | Characterization | Est. Semester Total (USD) |\n| :--- | :--- | :--- |\n| USA / Australia | High mandatory fees, forced meal plans, expensive insurance/visas. | $11,000 – $15,500 |\n| Canada / UK | High rent, but lower insurance/fees than USA. | $8,500 – $11,500 |\n| Northern Europe | High rent/groceries, but $0 admin fees and free/subsidized health. | $7,500 – $10,000 |\n| Western / Southern Europe | Subsidized transport, lower daily costs for social life. | $5,000 – $8,000 |\n| Mexico / Latin America | Campus-style amenities with very cheap local housing/food. | $3,500 – $6,000 |\n| East Asia (Japan / Korea) | Subsidized on-campus dorms, cheap \"quick-eat\" culture. | $4,500 – $7,500 |\n| China / Taiwan | Ultra-low dorm costs, massive local student subsidies. | $2,500 – $4,500 |\n| Eastern Europe | Modern EU infrastructure at the lowest Western prices. | $2,200 – $4,000 |\n\n\n    Student Preferences: \"I want a traditional, unified campus where it's easy to make friends, \n                    rather than commuting in a massive, overwhelming city.\n\n                    I'd love a place with cool museums, historical sites, good nightlife, \n                    and winters that aren't completely freezing.\n\n                    Financially, I need an affordable city where rent and groceries won't \n                    drain my savings. My absolute max budget is $9,000 for the semester.\"\n\n    Rules:\n    1. Evaluate and score EVERY university in the provided list based on how well it matches the user's input. \n    2. Grade each university (0-100) across these categories ONLY if the user's input relates to them. If a category is irrelevant to the prompt, output `null`\n    - `academic_fit`: Score based strictly on the university's standing in the Shanghai Ranking (ARWU). \n        Reward high research output, STEM focus, and global prestige. Penalize universities that lack a global research footprint.\n    - `lifestyle_fit`: Score the combined physical routine and social atmosphere. Evaluate the physical routine based on Campus Typology (enclosed residential bubble vs. \n        decentralized commuter school), City Scale (immersive college town vs. sprawling megacity), and Academic Pacing (hyper-competitive \"pressure-cooker\" vs. balanced workload). \n        Evaluate the social atmosphere based on the party vibe, ease of making friends, and international/Erasmus presence. Use your internal knowledge alongside the provided social media sentiment table as general assistance.\n    - `location_fit`: Nature/hikes, nightlife, art, culture, weather.\n    - `financial_fit`: Total cost of exchange (rent, food, travel). Base the score on the \"Reference Data\" table provided. \n        Use your internal knowledge to adjust the score/estimate slightly if the specific city or country is an outlier \n        (e.g., Zurich is more expensive than the \"Western Europe\" average). In the reasoning, provide a brief estimated total cost (e.g., ~$12k) for the semester.\n    - `jewish_israeli_community_fit`: Evaluate EXCLUSIVELY based on current antisemitism levels on and around campus, the accessibility of the local Jewish community (e.g., Chabad, synagogues, kosher food), and the presence of Israeli students or locals. \n        STRICTLY IGNORE general city crime rates, pickpocketing, or broad safety metrics.\n    - `other_preferences_fit`: Any specific user requests that do not fit into the above categories (e.g., specific sports, dietary needs, unique hobbies).\n    3. Provide a short `reasoning` explicitly referencing the evaluated traits.\n\n    Return ONLY a JSON object with this exact structure:\n    {\n        \"scored_universities\": [\n            {\n                \"university_name\": \"string\",\n                \"country\": \"string\",\n                \"scores\": {\n                    \"academic_fit\": int or null,\n                    \"lifestyle_fit\": int or null,\n                    \"social_fit\": int or null,\n                    \"location_fit\": int or null,\n                    \"financial_fit\": int or null,\n                    \"jewish_israeli_community_fit\": int or null,\n                    \"other_preferences_fit\": int or null\n                },\n                \"reasoning\": \"string\"\n            }\n        ]\n    }\n    ",
+          "top_k": 5
+        }
+      },
+      "response": {
+        "scored_universities": [
+          {
+            "university_name": "Alexandru Ioan Cuza University of Iasi",
+            "country": "romania",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 92,
+              "social_fit": 78,
+              "location_fit": 80,
+              "financial_fit": 100,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "Iasi is a textbook student city with a compact, social campus culture—excellent for making friends and immersive campus life. Rich historical sites, museums and a lively student nightlife; winters are colder than Mediterranean but generally tolerable. Estimated semester cost: ~$2,500–$3,500 (Eastern Europe low), well below your $9k cap.",
+            "total_score": 88,
+            "rank": 1
+          },
+          {
+            "university_name": "Friedrich Schiller University Jena",
+            "country": "germany",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 90,
+              "social_fit": 70,
+              "location_fit": 75,
+              "financial_fit": 100,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "Jena is a genuine university town with a compact, student-centered feel — ideal for a unified campus experience and easy friend-making. Good regional culture, museums and manageable nightlife; winters are colder but not extreme. Estimated semester cost: ~$3,500–$4,500 (Eastern/cheaper German city), very budget friendly relative to your $9k cap.",
+            "total_score": 84,
+            "rank": 2
+          },
+          {
+            "university_name": "Universidad ORT Uruguay",
+            "country": "uruguay",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 75,
+              "social_fit": 70,
+              "location_fit": 84,
+              "financial_fit": 100,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "ORT in Montevideo offers an urban-but-manageable campus feel in a mid-sized coastal capital with good cultural life, museums and relaxed nightlife; southern hemisphere winters are mild. Costs in Uruguay are comparatively low for an exchange. Estimated semester cost: ~$4,000 (Latin America), comfortably within budget.",
+            "total_score": 82,
+            "rank": 3
+          },
+          {
+            "university_name": "CentraleSupélec",
+            "country": "france",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 85,
+              "social_fit": 75,
+              "location_fit": 95,
+              "financial_fit": 60,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "CentraleSupélec (Saclay/Gif region) offers an elite, enclosed campus culture that facilitates friend-making and strong student organizations (more 'closed' grande école bubble). Proximity to Paris gives world-class museums, nightlife and cultural sites. Costs near Paris are higher than provincial France—estimated semester cost: ~$8,500–$9,000 (Western Europe, Paris premium), near your maximum.",
+            "total_score": 79,
+            "rank": 4
+          },
+          {
+            "university_name": "Anhalt University of Applied Sciences",
+            "country": "germany",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 88,
+              "social_fit": 55,
+              "location_fit": 68,
+              "financial_fit": 100,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "Anhalt UAS is in smaller towns with campus-like, close-knit student life (great for making friends) and very low costs. Cultural offerings are more modest than big cities but there are niche museums (e.g., Bauhaus in Dessau). Winters are cooler but not extreme. Estimated semester cost: ~$4,000–$5,000 (Germany, small-town outlier) — very affordable.",
+            "total_score": 78,
+            "rank": 5
+          },
+          {
+            "university_name": "University of Erlangen-Nuremberg",
+            "country": "germany",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 82,
+              "social_fit": 72,
+              "location_fit": 78,
+              "financial_fit": 80,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "Erlangen (with nearby Nuremberg) is a classic German student city with strong campus feel in Erlangen, lively student societies and an approachable social scene—good for making friends. The region offers museums, historical architecture and decent nightlife; winters are moderate. Estimated semester cost: ~$5,500–$6,000, under your $9k limit.",
+            "total_score": 78,
+            "rank": 6
+          },
+          {
+            "university_name": "Technical University of Munich",
+            "country": "germany",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 78,
+              "social_fit": 80,
+              "location_fit": 90,
+              "financial_fit": 60,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "TUM has strong campus elements (Garching) but also a big-city Munich presence; it’s social and well connected to student groups. Munich offers world-class museums, historic sites and nightlife, but winters are colder than Mediterranean options and cost of living is high. Estimated semester cost: ~$8,000–$9,000 (upper Western Europe), near your ceiling.",
+            "total_score": 77,
+            "rank": 7
+          },
+          {
+            "university_name": "Politecnico di Milano",
+            "country": "italy",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 40,
+              "social_fit": 95,
+              "location_fit": 92,
+              "financial_fit": 80,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "Polimi is an Erasmus/ international nightlife magnet with outstanding museums and cultural life in Milan, but it is decentralized within a large metropolis rather than a single unified residential campus (less ideal for your desire for a compact campus). Winters are mild-to-cool. Estimated semester cost: ~$6,500 (Western Europe/Milan), under $9k.",
+            "total_score": 77,
+            "rank": 8
+          },
+          {
+            "university_name": "Politecnico di Torino",
+            "country": "italy",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 65,
+              "social_fit": 70,
+              "location_fit": 88,
+              "financial_fit": 80,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "PoliTO is in Torino, a culturally rich city with excellent museums and history and more of a cohesive student city feel than Milan—better aligned with a traditional campus desire though still urban. Nightlife is good; winters can be cool. Estimated semester cost: ~$5,500–$6,000 (Western/Southern Europe), under $9k.",
+            "total_score": 76,
+            "rank": 9
+          },
+          {
+            "university_name": "ECAM Strasbourg",
+            "country": "france",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 75,
+              "social_fit": 65,
+              "location_fit": 80,
+              "financial_fit": 80,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "Strasbourg offers a medium-sized, walkable city with strong historical core and museums (good for culture/nightlife) and winters that are chilly but not extreme. ECAM is a smaller engineering school with a more unified, campus-like student experience (easy to make friends) but not a massive Erasmus party hub. Estimated semester cost: ~$6,000 (Western/Southern Europe typical), within your $9k cap.",
+            "total_score": 75,
+            "rank": 10
+          },
+          {
+            "university_name": "University of Cyprus",
+            "country": "cyprus",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 78,
+              "social_fit": 60,
+              "location_fit": 82,
+              "financial_fit": 80,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "University of Cyprus sits on a compact campus near Nicosia, giving a relatively unified student bubble and easier social integration; Nicosia offers historical sites and mild Mediterranean winters. Nightlife exists but is smaller than big European hubs. Estimated semester cost: ~$6,000 (Southern Europe tail), comfortably under $9k.",
+            "total_score": 75,
+            "rank": 11
+          },
+          {
+            "university_name": "Ecole Centrale Marseille",
+            "country": "france",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 62,
+              "social_fit": 65,
+              "location_fit": 85,
+              "financial_fit": 80,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "Centrale Marseille is in a large Mediterranean port city—excellent museums, historical neighborhoods, nightlife and mild winters. Campus life is less of an enclosed college-town bubble (more urban/integrated), so making friends requires more initiative. Estimated semester cost: ~$6,000 (Western/Southern Europe), under $9k.",
+            "total_score": 73,
+            "rank": 12
+          },
+          {
+            "university_name": "Technical University of Denmark (DTU)",
+            "country": "denmark",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 88,
+              "social_fit": 90,
+              "location_fit": 65,
+              "financial_fit": 40,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "DTU has a strong enclosed campus (Lyngby) with legendary campus bars and very active student life — excellent for making friends. Copenhagen gives world-class museums and nightlife but winters are colder and cost of living is high. Estimated semester cost: ~$9,500 (Northern Europe high), which exceeds or pushes your $9k comfort threshold.",
+            "total_score": 71,
+            "rank": 13
+          },
+          {
+            "university_name": "Leibniz Universität Hannover",
+            "country": "germany",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 70,
+              "social_fit": 60,
+              "location_fit": 65,
+              "financial_fit": 80,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "Hannover combines a sizable student population with campus pockets but is more of a mid-size city (moderate ease of meeting people). Cultural amenities and museums exist, winters moderate-cold. Estimated semester cost: ~$5,500 (Western Europe/Germany average), comfortably under $9k.",
+            "total_score": 69,
+            "rank": 14
+          },
+          {
+            "university_name": "Technical University of Berlin",
+            "country": "germany",
+            "scores": {
+              "academic_fit": null,
+              "lifestyle_fit": 30,
+              "social_fit": 75,
+              "location_fit": 92,
+              "financial_fit": 80,
+              "jewish_israeli_community_fit": null,
+              "other_preferences_fit": null
+            },
+            "reasoning": "TU Berlin is embedded in a sprawling global city (big commuter feel) — excellent museums, nightlife and culture but not a single unified residential campus, so it’s less aligned with your desire for an enclosed college-town. Winters are moderate. Estimated semester cost: ~$6,000 (Western Europe/Berlin), within your $9k budget.",
+            "total_score": 69,
+            "rank": 15
+          }
+        ],
+        "top_universities": [
+          "Alexandru Ioan Cuza University of Iasi",
+          "Friedrich Schiller University Jena",
+          "Universidad ORT Uruguay",
+          "CentraleSupélec",
+          "Anhalt University of Applied Sciences"
+        ]
+      }
+    },
+    {
+      "module": "Analyzer",
+      "prompt": {
+        "target_university": "Alexandru Ioan Cuza University of Iasi",
+        "user_prompt_preview": "Extract the exchange data for the following university based on the provided context.\n\n        TARGET UNIVERSITY: Alexandru Ioan Cuza University of Iasi\n\n        CONTEXT FROM FACTSHEETS:\n        ---\n        |<br> <br>**ExcepƟonal changes**<br> <br>(to be approved by e-mail or signature by the studen..."
+      },
+      "response": {
+        "academic": {
+          "min_credits_required": null,
+          "max_credits_allowed": null,
+          "instruction_languages": "Romanian, English, French",
+          "grading_system_summary": null,
+          "academic_summary_notes": "Many courses are taught in Romanian while certain bachelor and master specializations are taught entirely in English or French; Romanian courses are often supplemented by English tutorials where international students receive supervision and can be examined in English."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": null,
+          "housing_details": "University offers student residences (e.g., residence C5) and students must provide an accommodation contract for campus housing or certified rental/landlord declaration for private accommodation when registering.",
+          "university_sponsors_visa": null,
+          "estimated_visa_processing_weeks": null,
+          "mandatory_insurance_required": true,
+          "medical_and_insurance_details": "Proof of health insurance (EHIC or private) is required for immigration procedures and foreign citizens over 26 must have health insurance for residence extension; a medical certificate stating 'clinic sanatos' is also required and can be obtained at Titu Maiorescu Campus, C8 Hostel, room 1.",
+          "currency": "RON",
+          "estimated_housing_cost_per_month": null,
+          "estimated_living_cost_per_month": null,
+          "logistics_summary_notes": "Students must register with the General Inspectorate for Immigration in Iași submitting various documents (acceptance letter, ID, proof of accommodation, insurance, medical certificate); some registrations/documents are issued the same day and registration should be done within 30–60 days of arrival."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": true,
+          "orientation_is_mandatory": null,
+          "pre_semester_language_course_available": true,
+          "language_course_details": "A Romanian language course is offered but is only held if at least 10 students enroll and interest is queried during the orientation meeting.",
+          "integration_summary_notes": "An orientation meeting and an Erasmus academic coordinator provide guidance; tutorials and individual meetings allow international students to receive supervision and be examined or submit assignments in English."
+        }
+      }
+    },
+    {
+      "module": "Analyzer",
+      "prompt": {
+        "target_university": "Friedrich Schiller University Jena",
+        "user_prompt_preview": "Extract the exchange data for the following university based on the provided context.\n\n        TARGET UNIVERSITY: Friedrich Schiller University Jena\n\n        CONTEXT FROM FACTSHEETS:\n        ---\n        |Credit System<br>Course/Programme<br>Catalogue<br>Learning Agreement<br>and Course Schedule<br>M..."
+      },
+      "response": {
+        "academic": {
+          "min_credits_required": null,
+          "max_credits_allowed": null,
+          "instruction_languages": null,
+          "grading_system_summary": null,
+          "academic_summary_notes": "FSU Jena uses the ECTS system and the EU standard is 30 ECTS per semester; guest students may choose courses across most fields (except Medicine, Dentistry and Pharmacy) and receive a Transcript of Records after each semester."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": null,
+          "housing_details": "Student housing is in high demand and finding accommodation can be difficult; students should apply online via the Studentenwerk housing service and respect deadlines (15 July for winter/full year, 15 January for summer).",
+          "university_sponsors_visa": false,
+          "estimated_visa_processing_weeks": 6,
+          "mandatory_insurance_required": true,
+          "medical_and_insurance_details": "German public health insurance is mandatory and the International Office does not accept private/travel insurances; EU health cards/forms may be accepted if valid, and health insurance is estimated at 500 per semester for non-EU students.",
+          "currency": "EUR",
+          "estimated_housing_cost_per_month": null,
+          "estimated_living_cost_per_month": null,
+          "logistics_summary_notes": "Semester contribution is 190 (includes regional transport); tuition fee is 0 and estimated accommodation cost is listed as 2700 per semester; enrolment details and orientation week dates are communicated in the admission letter."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": true,
+          "orientation_is_mandatory": false,
+          "pre_semester_language_course_available": null,
+          "language_course_details": "The FSU Language Centre offers optional German and other language courses (20 per semester) from beginner to advanced to help international students improve language skills.",
+          "integration_summary_notes": "FSU Jena offers an Orientation Week before lectures and provides preparation workshops and mentoring for nominated students; there are many international student groups and language tandems available."
+        }
+      }
+    },
+    {
+      "module": "Analyzer",
+      "prompt": {
+        "target_university": "Universidad ORT Uruguay",
+        "user_prompt_preview": "Extract the exchange data for the following university based on the provided context.\n\n        TARGET UNIVERSITY: Universidad ORT Uruguay\n\n        CONTEXT FROM FACTSHEETS:\n        ---\n        . Our mission is to educate citzens capable of fulﬁlling their own<br>personal and professional aims and pro..."
+      },
+      "response": {
+        "academic": {
+          "min_credits_required": null,
+          "max_credits_allowed": null,
+          "instruction_languages": "Spanish, English",
+          "grading_system_summary": null,
+          "academic_summary_notes": "Offers a Spanish language course for incoming students and a variety of English-taught courses. The Student Exchange Office manages around 340 incoming/outgoing students yearly and maintains 129 partner institutions."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": null,
+          "housing_details": null,
+          "university_sponsors_visa": null,
+          "estimated_visa_processing_weeks": null,
+          "mandatory_insurance_required": null,
+          "medical_and_insurance_details": null,
+          "currency": "UYU",
+          "estimated_housing_cost_per_month": null,
+          "estimated_living_cost_per_month": null,
+          "logistics_summary_notes": "Universidad ORT Uruguay has two campuses with extensive facilities, libraries, and campus-wide Wi-Fi. The factsheet does not provide details about housing availability, visa sponsorship, processing times, or insurance requirements."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": null,
+          "orientation_is_mandatory": null,
+          "pre_semester_language_course_available": true,
+          "language_course_details": "Spanish language course offered to incoming students; also a variety of English-taught courses available.",
+          "integration_summary_notes": "The Student Exchange Office provides management and support for mobility programs. A Spanish course is offered to incoming students, but the factsheet does not explicitly mention a buddy program or mandatory orientation."
+        }
+      }
+    },
+    {
+      "module": "Analyzer",
+      "prompt": {
+        "target_university": "CentraleSupélec",
+        "user_prompt_preview": "Extract the exchange data for the following university based on the provided context.\n\n        TARGET UNIVERSITY: CentraleSupélec\n\n        CONTEXT FROM FACTSHEETS:\n        ---\n        Institution coordinates the Graduate School of Engineering and Systems Sciences of\nUniversité Paris-Saclay, which ra..."
+      },
+      "response": {
+        "academic": {
+          "min_credits_required": 15,
+          "max_credits_allowed": 30,
+          "instruction_languages": "French and English (most courses, especially Fall and 3rd-year, are taught in French)",
+          "grading_system_summary": "Scale 0-20 with minimum passing grade 10 for credit transfer.",
+          "academic_summary_notes": "Regular courseload is 30 ECTS/semester; exchange students must take 20 ECTS/semester if coming for a full year or 15 ECTS/semester for 2nd-year exchanges."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": false,
+          "housing_details": "Limited on-campus housing; applications open after admission; campus residences include Césal (Paris-Saclay), Residence Belle Fontaine (Rennes) and Residence Edouard Branly (Metz).",
+          "university_sponsors_visa": false,
+          "estimated_visa_processing_weeks": null,
+          "mandatory_insurance_required": true,
+          "medical_and_insurance_details": "Health insurance is mandatory; EU students use EHIC and non-EU students can enroll in French Social Security upon arrival; comprehensive coverage for lodging, liability and belongings is required.",
+          "currency": "EUR",
+          "estimated_housing_cost_per_month": "Paris-Saclay: 400-750, Rennes: 350-450, Metz: 350-450",
+          "estimated_living_cost_per_month": "700 (estimated budget for full-year mobility, includes accommodation)",
+          "logistics_summary_notes": "Students are responsible for securing and paying for visas; limited campus housing available and health insurance is mandatory for all students."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": true,
+          "orientation_is_mandatory": null,
+          "pre_semester_language_course_available": true,
+          "language_course_details": "Intensive French classes available at Cavilam (Alliance Française) prior to the semester; admitted double-degree students invited to a pre-programme summer school focusing on French, mathematics and physics.",
+          "integration_summary_notes": "Orientation sessions are offered each semester and a summer school is available for double-degree students; no buddy programme is mentioned."
+        }
+      }
+    },
+    {
+      "module": "Analyzer",
+      "prompt": {
+        "target_university": "Anhalt University of Applied Sciences",
+        "user_prompt_preview": "Extract the exchange data for the following university based on the provided context.\n\n        TARGET UNIVERSITY: Anhalt University of Applied Sciences\n\n        CONTEXT FROM FACTSHEETS:\n        ---\n        |Photovoltaics Engineering Science (M. Sc.) https://www.hs-anhalt.de/mpv<br>Grading System<br>..."
+      },
+      "response": {
+        "academic": {
+          "min_credits_required": null,
+          "max_credits_allowed": 30,
+          "instruction_languages": "English, German (depending on program and term)",
+          "grading_system_summary": "ECTS is used (1 academic year = 60 ECTS, 1 semester = 30 ECTS); grading scheme and grade conversion table available online.",
+          "academic_summary_notes": "Students typically take approximately 30 ECTS per semester; minimum number of credits must be confirmed with the home university."
+        },
+        "housing_and_logistics": {
+          "campus_housing_guaranteed": null,
+          "housing_details": "Studentenwerk Halle offers student residences on campuses in Bernburg, Dessau and Köthen; see www.studentenwerk-halle.de or contact Tel. +49 3496 67 6424.",
+          "university_sponsors_visa": null,
+          "estimated_visa_processing_weeks": null,
+          "mandatory_insurance_required": true,
+          "medical_and_insurance_details": "ERASMUS students must bring an EHIC; non-EU students should consult the university website; statutory student health insurance is approx. 135 EUR/month.",
+          "currency": "EUR",
+          "estimated_housing_cost_per_month": "250 - 450",
+          "estimated_living_cost_per_month": "803 - 920",
+          "logistics_summary_notes": "Approximate total monthly costs are ~803-920 EUR including accommodation (250-450 EUR); non-EU students may need a visa and/or residence permit and must pay related fees."
+        },
+        "student_integration": {
+          "buddy_program_available": null,
+          "orientation_program_provided": null,
+          "orientation_is_mandatory": null,
+          "pre_semester_language_course_available": null,
+          "language_course_details": "Students from partner institutions can submit a language certificate provided by the sending institution.",
+          "integration_summary_notes": "No explicit information on buddy or mandatory orientation programs in the factsheet; language certificates from the home institution are accepted."
+        }
+      }
+    }
+  ]
+}

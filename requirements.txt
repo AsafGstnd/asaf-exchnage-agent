@@ -1,0 +1,30 @@
+# Web Frameworks
+fastapi
+uvicorn
+streamlit
+
+# Database & Vector DB
+pinecone
+supabase
+
+# Data Science & PDF Processing
+fitz
+pdf2image
+pytesseract
+pymupdf4llm
+
+# LLMs & Embeddings
+langgraph
+langchain-text-splitters
+tiktoken
+
+# API & Utilities
+requests
+python-dotenv
+pydantic
+
+# Testing
+pytest
+
+# Web search (CourseFinder ReAct tool)
+ddgs

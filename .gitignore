@@ -1,0 +1,11 @@
+
+# Virtual Environment
+venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# Data folder (do not track university PDFs or extracted data)
+data/
