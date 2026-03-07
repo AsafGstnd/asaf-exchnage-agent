@@ -61,8 +61,11 @@ async function runAgent(){
 
  html+="<h3>Steps</h3>";
 
- (data.steps||[]).forEach(s=>{
-   html+="<pre>"+JSON.stringify(s,null,2)+"</pre>";
+ (data.steps||[]).forEach((s,i)=>{
+   html+="<details open><summary><strong>Step "+(i+1)+": "+s.module+"</strong></summary>";
+   html+="<p><strong>Prompt:</strong></p><pre>"+JSON.stringify(s.prompt,null,2)+"</pre>";
+   html+="<p><strong>Response:</strong></p><pre>"+JSON.stringify(s.response,null,2)+"</pre>";
+   html+="</details>";
  });
 
  document.getElementById("output").innerHTML=html;
