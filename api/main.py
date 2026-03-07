@@ -28,6 +28,8 @@ UI_HTML = """
 body {font-family: sans-serif; background:#0f172a; color:#e2e8f0; padding:20px;}
 textarea{width:100%;height:150px;background:#1e293b;color:white;border-radius:6px;padding:10px;}
 button{padding:10px 20px;margin-top:10px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;}
+button:disabled{background:#475569;cursor:not-allowed;}
+#status{margin-top:10px;font-style:italic;color:#94a3b8;}
 pre{background:#020617;padding:10px;border-radius:6px;overflow-x:auto;}
 </style>
 </head>
@@ -40,12 +42,20 @@ pre{background:#020617;padding:10px;border-radius:6px;overflow-x:auto;}
 </textarea>
 
 <br>
-<button onclick="runAgent()">Run Agent</button>
+<button id="runBtn" onclick="runAgent()">Run Agent</button>
+<div id="status"></div>
 
 <div id="output"></div>
 
 <script>
 async function runAgent(){
+
+ const btn = document.getElementById("runBtn");
+ const status = document.getElementById("status");
+
+ btn.disabled = true;
+ status.textContent = "🤔 Thinking... agent is reasoning over universities, courses, and logistics.";
+ document.getElementById("output").innerHTML = "";
 
  const prompt = document.getElementById("prompt").value;
 
@@ -61,11 +71,17 @@ async function runAgent(){
 
  html+="<h3>Steps</h3>";
 
- (data.steps||[]).forEach(s=>{
-   html+="<pre>"+JSON.stringify(s,null,2)+"</pre>";
+ (data.steps||[]).forEach((s,i)=>{
+   html+="<details open><summary><strong>Step "+(i+1)+": "+s.module+"</strong></summary>";
+   html+="<p><strong>Prompt:</strong></p><pre>"+JSON.stringify(s.prompt,null,2)+"</pre>";
+   html+="<p><strong>Response:</strong></p><pre>"+JSON.stringify(s.response,null,2)+"</pre>";
+   html+="</details>";
  });
 
  document.getElementById("output").innerHTML=html;
+
+ status.textContent = "✅ Agent run completed.";
+ btn.disabled = false;
 
 }
 </script>
