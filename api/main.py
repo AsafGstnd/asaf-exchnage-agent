@@ -5,16 +5,32 @@ from typing import List, Optional, Dict, Any
 import uvicorn
 import os
 import json
+import logging
 
-from orchestration.supervisor import Supervisor
-
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Fez Exchange Agent API",
     description="University exchange recommendation AI agent"
 )
 
-agent = Supervisor()
+agent = None
+try:
+    from orchestration.supervisor import Supervisor as RealSupervisor
+    agent = RealSupervisor()
+    logger.info("✅ Supervisor initialized successfully")
+except Exception as _init_err:
+    logger.error("❌ Failed to initialize real Supervisor: %s", _init_err, exc_info=True)
+    try:
+        from orchestration.mock_supervisor import Supervisor as MockSupervisor
+        agent = MockSupervisor()
+        logger.warning("⚠️ Using MockSupervisor as fallback")
+    except Exception as _mock_err:
+        logger.error("❌ Failed to initialize MockSupervisor: %s", _mock_err, exc_info=True)
 
 # ---------------- WEB UI ---------------- #
 
@@ -214,36 +230,57 @@ def get_architecture():
 
 @app.post("/api/execute", response_model=ExecuteResponse)
 def execute_agent(request: ExecuteRequest):
+    logger.debug("[execute] Received prompt: %.200s", request.prompt)
+
+    if agent is None:
+        logger.error("[execute] Agent is not initialized")
+        return {
+            "status": "error",
+            "error": "Agent failed to initialize at startup. Check server logs.",
+            "response": None,
+            "steps": []
+        }
 
     try:
 
         try:
             user_profile = json.loads(request.prompt)
             chat_msg = ""
+            logger.debug("[execute] Parsed JSON profile with keys: %s", list(user_profile.keys()))
 
         except json.JSONDecodeError:
             user_profile = {}
             chat_msg = request.prompt
+            logger.debug("[execute] Using free-text prompt: %.100s", chat_msg)
 
+        logger.debug("[execute] Invoking supervisor...")
         result = agent.run(
             new_chat_message=chat_msg,
             user_profile_dict=user_profile
         )
 
+        analysis = result.get("analysis", [])
+        courses = result.get("courses", [])
+        steps = result.get("steps", [])
+        logger.debug("[execute] analysis=%d items, courses=%d items, steps=%d items",
+                     len(analysis) if isinstance(analysis, list) else 0,
+                     len(courses) if isinstance(courses, list) else 0,
+                     len(steps) if isinstance(steps, list) else 0)
+
         response_payload = json.dumps({
-            "analysis": result.get("analysis", []),
-            "courses": result.get("courses", [])
+            "analysis": analysis,
+            "courses": courses
         })
 
         return {
             "status": "ok",
             "error": None,
             "response": response_payload,
-            "steps": result.get("steps", [])
+            "steps": steps
         }
 
     except Exception as e:
-
+        logger.error("[execute] Unhandled error: %s", e, exc_info=True)
         return {
             "status": "error",
             "error": str(e),
