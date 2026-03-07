@@ -104,8 +104,8 @@ class ExecuteResponse(BaseModel):
 @app.get("/api/team_info")
 def get_team_info():
     return {
-        "group_batch_order_number": "01_01",
-        "team_name": "Fez Exchange Agent",
+        "group_batch_order_number": "1_1",
+        "team_name": "Fez Exchange Agent Team",
         "students": [
             {
                 "name": "Yam Ben Tob",
