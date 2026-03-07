@@ -6,11 +6,14 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from pathlib import Path
 import json
+import logging
 
 from orchestration.specialists.ranker import score_universities_with_llm, process_llm_scores
 from orchestration.specialists.analyzer import analyze_universities
 from orchestration.specialists.filter import filter_universities
 from utils import config 
+
+logger = logging.getLogger(__name__)
 
 # 1. Define the State Schema
 class AgentState(TypedDict, total=False):
@@ -27,16 +30,29 @@ class AgentState(TypedDict, total=False):
 
 # 2. Define the Nodes
 def filter_node(state: AgentState):
-    filtered_result = filter_universities(state["user_iformation"])
-    step = {
-        "module": "Filter",
-        "prompt": {"action": "Query Supabase", "criteria": state["user_iformation"]},
-        "response": {"found_universities": len(filtered_result["universities"]), "traced_steps": filtered_result.get("traced_steps", [])}
-    }
-    return {
-        "valid_universities_list": filtered_result["universities"],
-        "steps": (state.get("steps") or []) + [step]
-    }
+    try:
+        filtered_result = filter_universities(state["user_iformation"])
+        step = {
+            "module": "Filter",
+            "prompt": {"action": "Query Supabase", "criteria": state["user_iformation"]},
+            "response": {"found_universities": len(filtered_result["universities"]), "traced_steps": filtered_result.get("traced_steps", [])}
+        }
+        logger.debug("[filter_node] Found %d universities", len(filtered_result["universities"]))
+        return {
+            "valid_universities_list": filtered_result["universities"],
+            "steps": (state.get("steps") or []) + [step]
+        }
+    except Exception as e:
+        logger.error("[filter_node] Error: %s", e, exc_info=True)
+        step = {
+            "module": "Filter",
+            "prompt": {"action": "Query Supabase", "criteria": state.get("user_iformation", {})},
+            "response": {"error": str(e), "found_universities": 0}
+        }
+        return {
+            "valid_universities_list": [],
+            "steps": (state.get("steps") or []) + [step]
+        }
 
 def rank_node(state: AgentState):
     universities = state.get("valid_universities_list", []) or []
@@ -61,65 +77,106 @@ def rank_node(state: AgentState):
                 "top_universities": top_universities,
             },
         }
+        logger.debug("[rank_node] Skipped LLM ranking (%d candidates), top_universities=%s", len(universities), top_universities)
         return {
             "universities_fit_text": [],
             "top_universities": top_universities,
             "steps": (state.get("steps") or []) + [step],
         }
 
-    preferences = state["user_iformation"].get("preferences", {})
-    free_language_preferences = preferences.get("free_language_preferences", "")
-    llm_json_response, rank_prompt = score_universities_with_llm(
-        state["valid_universities_list"],
-        free_language_preferences,
-        state["top_k"],
-        return_prompt=True,
-    )
-    reasonings = [uni.get("reasoning", "") for uni in llm_json_response.get("scored_universities", [])]
-    top_universities = process_llm_scores(llm_json_response, top_k=state["top_k"])
-    step = {
-        "module": "Ranker",
-        "prompt": {"llm_prompt": rank_prompt},
-        "response": {
-            "scored_universities": llm_json_response.get("scored_universities", []),
+    try:
+        preferences = state["user_iformation"].get("preferences", {})
+        free_language_preferences = preferences.get("free_language_preferences", "")
+        llm_json_response, rank_prompt = score_universities_with_llm(
+            state["valid_universities_list"],
+            free_language_preferences,
+            state["top_k"],
+            return_prompt=True,
+        )
+        reasonings = [uni.get("reasoning", "") for uni in llm_json_response.get("scored_universities", [])]
+        top_universities = process_llm_scores(llm_json_response, top_k=state["top_k"])
+        step = {
+            "module": "Ranker",
+            "prompt": {"llm_prompt": rank_prompt},
+            "response": {
+                "scored_universities": llm_json_response.get("scored_universities", []),
+                "top_universities": top_universities,
+            },
+        }
+        logger.debug("[rank_node] top_universities=%s", top_universities)
+        return {
+            "universities_fit_text": reasonings,
             "top_universities": top_universities,
-        },
-    }
-    return {
-        "universities_fit_text": reasonings,
-        "top_universities": top_universities,
-        "steps": (state.get("steps") or []) + [step],
-    }
+            "steps": (state.get("steps") or []) + [step],
+        }
+    except Exception as e:
+        logger.error("[rank_node] Error: %s", e, exc_info=True)
+        top_universities = [u.get("name") for u in universities if isinstance(u, dict) and u.get("name")][:state.get("top_k", 5)]
+        step = {
+            "module": "Ranker",
+            "prompt": {"action": "LLM scoring", "candidate_count": len(universities)},
+            "response": {"error": str(e), "top_universities": top_universities},
+        }
+        return {
+            "universities_fit_text": [],
+            "top_universities": top_universities,
+            "steps": (state.get("steps") or []) + [step],
+        }
 
 def course_finder_node(state: AgentState):
-    from orchestration.specialists.course_finder import find_courses_react
-    courses = find_courses_react(
-        state.get("top_universities", []),
-        state.get("user_iformation", {})
-    )
-    step = {
-        "module": "CourseFinder",
-        "prompt": {
-            "universities": state.get("top_universities", []),
-            "major": state.get("user_iformation", {}).get("academic_profile", {}).get("major"),
-            "languages": state.get("user_iformation", {}).get("language_profile", {}).get("non_english_languages", [])
-        },
-        "response": {"courses_found": len(courses), "courses": courses}
-    }
-    return {"courses": courses, "steps": (state.get("steps") or []) + [step]}
+    try:
+        from orchestration.specialists.course_finder import find_courses_react
+        courses = find_courses_react(
+            state.get("top_universities", []),
+            state.get("user_iformation", {})
+        )
+        step = {
+            "module": "CourseFinder",
+            "prompt": {
+                "universities": state.get("top_universities", []),
+                "major": state.get("user_iformation", {}).get("academic_profile", {}).get("major"),
+                "languages": state.get("user_iformation", {}).get("language_profile", {}).get("non_english_languages", [])
+            },
+            "response": {"courses_found": len(courses), "courses": courses}
+        }
+        logger.debug("[course_finder_node] Found %d course entries", len(courses))
+        return {"courses": courses, "steps": (state.get("steps") or []) + [step]}
+    except Exception as e:
+        logger.error("[course_finder_node] Error: %s", e, exc_info=True)
+        step = {
+            "module": "CourseFinder",
+            "prompt": {
+                "universities": state.get("top_universities", []),
+                "major": state.get("user_iformation", {}).get("academic_profile", {}).get("major")
+            },
+            "response": {"error": str(e), "courses_found": 0}
+        }
+        return {"courses": [], "steps": (state.get("steps") or []) + [step]}
 
 def analyze_node(state: AgentState):
-    analysis_results, analyze_steps = analyze_universities(
-        state.get("top_universities", []),
-        state.get("universities_fit_text", None),
-        courses=state.get("courses", []),
-        return_steps=True
-    )
-    # formatted = _format_analysis_as_string(analysis_results)
-    return {
-        "analysis": analysis_results,
-        "steps": (state.get("steps") or []) + analyze_steps
-    }
+    try:
+        analysis_results, analyze_steps = analyze_universities(
+            state.get("top_universities", []),
+            state.get("universities_fit_text", None),
+            courses=state.get("courses", []),
+            return_steps=True
+        )
+        logger.debug("[analyze_node] Analyzed %d universities, %d steps", len(analysis_results), len(analyze_steps))
+        return {
+            "analysis": analysis_results,
+            "steps": (state.get("steps") or []) + analyze_steps
+        }
+    except Exception as e:
+        logger.error("[analyze_node] Error: %s", e, exc_info=True)
+        step = {
+            "module": "Analyzer",
+            "prompt": {"targets": state.get("top_universities", [])},
+            "response": {"error": str(e), "universities_analyzed": 0}
+        }
+        return {
+            "analysis": [],
+            "steps": (state.get("steps") or []) + [step]
+        }
 
 def _format_analysis_as_string(analysis_results: list) -> str:
     """Format analysis list into a human-readable string for API response."""
