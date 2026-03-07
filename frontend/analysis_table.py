@@ -75,7 +75,7 @@ if run_button:
                     # MOCK THE API EXACTLY: Convert the native Python list into a string
                     # so the downstream UI code handles local and server data identically!
                     payload = {"analysis": result.get("analysis", []), "courses": result.get("courses", [])}
-                data = {
+                    data = {
                         "status": "ok",
                         "error": None,
                         "response": json.dumps(payload),
