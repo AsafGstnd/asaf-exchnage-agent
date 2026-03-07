@@ -39,25 +39,56 @@ def filter_node(state: AgentState):
     }
 
 def rank_node(state: AgentState):
+    universities = state.get("valid_universities_list", []) or []
+
+    # Cost-aware optimization: skip expensive LLM ranking when the candidate set is already very small
+    # to reduce token usage and latency.
+    if len(universities) <= 3:
+        top_universities = [
+            u.get("name")
+            for u in universities
+            if isinstance(u, dict) and u.get("name")
+        ]
+        step = {
+            "module": "Ranker",
+            "prompt": {
+                "action": "skip_llm_ranking",
+                "reason": "few_candidates",
+                "candidate_count": len(universities),
+            },
+            "response": {
+                "scored_universities": [],
+                "top_universities": top_universities,
+            },
+        }
+        return {
+            "universities_fit_text": [],
+            "top_universities": top_universities,
+            "steps": (state.get("steps") or []) + [step],
+        }
+
     preferences = state["user_iformation"].get("preferences", {})
     free_language_preferences = preferences.get("free_language_preferences", "")
     llm_json_response, rank_prompt = score_universities_with_llm(
         state["valid_universities_list"],
         free_language_preferences,
         state["top_k"],
-        return_prompt=True
+        return_prompt=True,
     )
     reasonings = [uni.get("reasoning", "") for uni in llm_json_response.get("scored_universities", [])]
     top_universities = process_llm_scores(llm_json_response, top_k=state["top_k"])
     step = {
         "module": "Ranker",
         "prompt": {"llm_prompt": rank_prompt},
-        "response": {"scored_universities": llm_json_response.get("scored_universities", []), "top_universities": top_universities}
+        "response": {
+            "scored_universities": llm_json_response.get("scored_universities", []),
+            "top_universities": top_universities,
+        },
     }
     return {
         "universities_fit_text": reasonings,
         "top_universities": top_universities,
-        "steps": (state.get("steps") or []) + [step]
+        "steps": (state.get("steps") or []) + [step],
     }
 
 def course_finder_node(state: AgentState):
