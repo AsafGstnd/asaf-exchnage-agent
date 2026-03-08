@@ -538,6 +538,8 @@ const EXAMPLES = {
   }, null, 2)
 };
 
+let currentSessionId = null;  // store session ID for conversation continuity
+
 function loadExample(key) {
   document.getElementById("prompt").value = EXAMPLES[key];
 }
@@ -677,13 +679,22 @@ async function runAgent() {
   document.getElementById("output").innerHTML = "";
 
   try {
+    const payload = { prompt };
+    if (currentSessionId) {
+      payload.session_id = currentSessionId;
+    }
     const res = await fetch("/api/execute", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
     stopSpinner();
+
+    // Store session_id for conversation continuity
+    if (data.session_id) {
+      currentSessionId = data.session_id;
+    }
 
     if (data.status === "error") {
       document.getElementById("output").innerHTML = `<div class="error-banner">⚠️ <div><strong>Agent Error</strong><br>${esc(data.error || "Unknown error")}</div></div>`;

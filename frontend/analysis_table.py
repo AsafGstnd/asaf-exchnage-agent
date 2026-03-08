@@ -204,17 +204,21 @@ if run_button:
 
                 raw_response_string = data.get("response", "{}")
                 try:
-                    parsed = json.loads(raw_response_string)
+                    # Handle both stringified JSON and already-materialized objects
+                    if isinstance(raw_response_string, str):
+                        parsed = json.loads(raw_response_string)
+                    else:
+                        parsed = raw_response_string
                     if isinstance(parsed, list):
                         universities = parsed
                         courses_list = []
                     else:
                         universities = parsed.get("analysis", [])
                         courses_list = parsed.get("courses", [])
-                except json.JSONDecodeError:
+                except (json.JSONDecodeError, AttributeError, TypeError):
                     universities = []
                     courses_list = []
-                    st.warning("⚠️ Could not parse the agent response.")
+                    st.warning("⚠️ Could not parse the agent response. Please try again.")
 
                 courses_by_university = {
                     c.get("university_name", ""): c.get("matched_courses", [])

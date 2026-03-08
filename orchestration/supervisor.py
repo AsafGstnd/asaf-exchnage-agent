@@ -162,6 +162,33 @@ def course_finder_node(state: AgentState):
         }
         return {"courses": [], "steps": (state.get("steps") or []) + [step]}
 
+def synthesize_analysis_from_courses(courses: List[dict], top_universities: List[str]) -> List[dict]:
+    """
+    If analysis is empty but courses exist, create minimal analysis entries.
+    This prevents confusing "no matches" when courses actually matched universities.
+    """
+    if not courses:
+        return []
+
+    synthesis = []
+    for course_entry in courses:
+        uni_name = course_entry.get("university_name")
+        matched_courses = course_entry.get("matched_courses", [])
+
+        if matched_courses:
+            synthesis.append({
+                "university_name": uni_name,
+                "general_fit_reasoning": "University has matching courses available.",
+                "requirements": {},
+                "logistics": {},
+                "matched_courses": matched_courses,
+            })
+
+    if synthesis:
+        logger.info("[Supervisor] Synthesized minimal analysis from %d course entries", len(synthesis))
+    return synthesis
+
+
 def analyze_node(state: AgentState):
     try:
         analysis_results, analyze_steps = analyze_universities(
@@ -171,19 +198,37 @@ def analyze_node(state: AgentState):
             return_steps=True
         )
         logger.debug("[analyze_node] Analyzed %d universities, %d steps", len(analysis_results), len(analyze_steps))
+
+        # If analysis is empty but courses exist, synthesize minimal analysis
+        if not analysis_results and state.get("courses"):
+            logger.info("[analyze_node] Synthesizing analysis from courses (RAG/requirements unavailable)")
+            analysis_results = synthesize_analysis_from_courses(
+                state.get("courses", []),
+                state.get("top_universities", [])
+            )
+
         return {
             "analysis": analysis_results,
             "steps": (state.get("steps") or []) + analyze_steps
         }
     except Exception as e:
         logger.error("[analyze_node] Error: %s", e, exc_info=True)
+
+        # If error occurred but courses exist, synthesize from courses
+        courses = state.get("courses", [])
+        if courses:
+            logger.warning("[analyze_node] Using courses-only fallback due to error")
+            analysis_results = synthesize_analysis_from_courses(courses, state.get("top_universities", []))
+        else:
+            analysis_results = []
+
         step = {
             "module": "Analyzer",
             "prompt": {"targets": state.get("top_universities", [])},
-            "response": {"error": str(e), "universities_analyzed": 0}
+            "response": {"error": "Analysis failed", "universities_analyzed": len(analysis_results), "fallback": "courses_only"}
         }
         return {
-            "analysis": [],
+            "analysis": analysis_results,
             "steps": (state.get("steps") or []) + [step]
         }
 
