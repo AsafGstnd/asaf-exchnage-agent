@@ -10,70 +10,169 @@ from orchestration.supervisor import Supervisor
 _use_api_env = os.getenv("USE_API", "").lower() in ("true", "1", "yes")
 API_URL_DEFAULT = os.getenv("API_URL", "http://localhost:8000/api")
 
-st.set_page_config(page_title="Exchange Agent Pro", layout="wide")
-st.title("🎓 University Selection Dashboard")
+st.set_page_config(
+    page_title="Fez Exchange Agent – Find Your University",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-# --- Sidebar: API mode toggle and input ---
+# ── Minimal global style tweaks ──
+st.markdown("""
+<style>
+/* Tighten hero section */
+.hero-block { padding: 0.5rem 0 1.5rem 0; }
+/* Compact metric cards */
+div[data-testid="metric-container"] { background:#1e293b; border-radius:8px; padding:12px 16px; }
+/* Improve expander spacing */
+div[data-testid="stExpander"] { border: 1px solid #334155 !important; border-radius:8px !important; }
+</style>
+""", unsafe_allow_html=True)
+
+# ── Hero ──
+st.markdown('<div class="hero-block">', unsafe_allow_html=True)
+st.title("🎓 Find Your Perfect Exchange University")
+st.caption(
+    "Our multi-agent AI **filters** universities by your academic profile, "
+    "**ranks** them by your lifestyle preferences, **finds matching courses**, "
+    "and **analyzes** logistics for the top results."
+)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ── Pre-built example profiles ──
+EXAMPLE_PROFILES = {
+    "💻 CS + Nightlife": {
+        "academic_profile": {"gpa": 85, "major": "Computer Science"},
+        "preferences": {"free_language_preferences": "nightlife, party vibe, easy to make friends"}
+    },
+    "📊 Business + Budget": {
+        "academic_profile": {"gpa": 80, "major": "Business Administration"},
+        "preferences": {"free_language_preferences": "affordable, low cost of living, budget friendly"}
+    },
+    "⚙️ Engineering + Culture": {
+        "academic_profile": {"gpa": 78, "major": "Electrical Engineering"},
+        "preferences": {"free_language_preferences": "culture, history, museums, beautiful city"}
+    },
+    "🌍 CS + English-only": {
+        "academic_profile": {"gpa": 82, "major": "Computer Science"},
+        "preferences": {"free_language_preferences": "English spoken environment, international community"},
+        "language_profile": {"english_only": True}
+    },
+}
+
+# --- Sidebar ---
 with st.sidebar:
-    use_api = st.checkbox("Use deployed API", value=_use_api_env, help="Call deployed server. Set USE_API=true and API_URL for your Render URL.")
+    st.markdown("## ⚙️ Settings")
+    st.divider()
+
+    # API mode
+    use_api = st.checkbox(
+        "Use deployed API",
+        value=_use_api_env,
+        help="Call the deployed Render server instead of running the agent locally. "
+             "Set USE_API=true and API_URL in your environment for the hosted URL."
+    )
     if use_api:
-        api_url = st.text_input("API URL", value=API_URL_DEFAULT, help="e.g. https://your-app.onrender.com/api")
+        api_url = st.text_input(
+            "API URL",
+            value=API_URL_DEFAULT,
+            help="e.g. https://your-app.onrender.com/api"
+        )
     else:
         api_url = API_URL_DEFAULT
+
+    st.divider()
+
+    # Quick example buttons
+    st.markdown("### 🚀 Quick Examples")
+    st.caption("Click any profile to load it into the editor below.")
+    for label, profile in EXAMPLE_PROFILES.items():
+        if st.button(label, use_container_width=True, key=f"ex_{label}"):
+            st.session_state["profile_text"] = json.dumps(profile, indent=4)
+
+    st.divider()
+
+    # Input area
+    st.markdown("### ✏️ Your Profile")
+    st.caption(
+        "Paste a **JSON profile** or type a **free-text follow-up** "
+        "(e.g. *\"show me something cheaper\"* or *\"find more universities\"*)."
+    )
+
+    default_profile = json.dumps(
+        get_student_profiles().get("default", EXAMPLE_PROFILES["💻 CS + Nightlife"]),
+        indent=4
+    )
+    raw_user_str = st.text_area(
+        "Profile / Message",
+        value=st.session_state.get("profile_text", default_profile),
+        height=360,
+        label_visibility="collapsed",
+        placeholder='{"academic_profile": {"gpa": 85, "major": "Computer Science"}, ...}'
+    )
+
+    with st.expander("📖 JSON Format Guide"):
+        st.markdown("""
+```json
+{
+  "academic_profile": {
+    "gpa": 85,
+    "major": "Computer Science"
+  },
+  "preferences": {
+    "free_language_preferences": "nightlife, affordable"
+  },
+  "language_profile": {
+    "english_only": true
+  },
+  "availability": {
+    "semester": "fall",
+    "year": 2025
+  }
+}
+```
+**Key fields:**
+- `gpa` — score on **0–100** scale
+- `major` — your field of study
+- `free_language_preferences` — lifestyle keywords
+        """)
+
+    run_button = st.button("🔍 Run Agent", use_container_width=True, type="primary")
+
 USE_API = use_api
 API_URL = api_url
 
-# Initialize local agent in session state so it remembers memory between clicks
+# Initialize local agent
 if not USE_API:
     if Supervisor is None:
         st.error("Supervisor class could not be imported. Enable 'Use deployed API' or fix local imports.")
     elif "agent" not in st.session_state:
-        st.session_state.agent = Supervisor()
-
-# --- Sidebar Input ---
-with st.sidebar:
-    st.header("Search Settings")
-    user_dict = get_student_profiles().get("default", {})
-    formatted_user_str = json.dumps(user_dict, indent=4)
-    raw_user_str = st.text_area(
-        "User Profile (JSON) or Chat Message:", 
-        value=formatted_user_str, 
-        height=400
-    )
-    run_button = st.button("Run Agent", use_container_width=True)
+        with st.spinner("Initializing local agent…"):
+            st.session_state.agent = Supervisor()
 
 # --- Main Logic ---
 if run_button:
-    with st.spinner("Analyzing universities..."):
+    with st.spinner("🤖 Agents at work — this may take up to 2 minutes…"):
         try:
             # ==========================================
             # 1. DATA FETCHING (Local vs Server)
             # ==========================================
             if USE_API:
-                # --- SERVER RUN ---
-                # The API returns "response" as a stringified JSON to satisfy the strict rubric
                 res = requests.post(f"{API_URL}/execute", json={"prompt": raw_user_str})
                 data = res.json()
-                
+
             else:
-                # --- LOCAL RUN ---
-                # Replicate the exact routing logic from your FastAPI endpoint
                 try:
                     user_profile = json.loads(raw_user_str)
-                    chat_msg = "" 
+                    chat_msg = ""
                 except json.JSONDecodeError:
                     user_profile = {}
                     chat_msg = raw_user_str
-                
+
                 try:
-                    # Run the agent directly. result["analysis"] is a Python list of dicts.
                     result = st.session_state.agent.run(
-                        new_chat_message=chat_msg, 
+                        new_chat_message=chat_msg,
                         user_profile_dict=user_profile
                     )
-                    
-                    # MOCK THE API EXACTLY: Convert the native Python list into a string
-                    # so the downstream UI code handles local and server data identically!
                     payload = {"analysis": result.get("analysis", []), "courses": result.get("courses", [])}
                     data = {
                         "status": "ok",
@@ -82,7 +181,6 @@ if run_button:
                         "steps": result.get("steps", [])
                     }
                 except Exception as local_e:
-                    # Mock an API error format if the agent crashes locally
                     data = {
                         "status": "error",
                         "error": str(local_e),
@@ -91,14 +189,10 @@ if run_button:
                     }
 
             # ==========================================
-            # 2. UI RENDERING (Identical for both modes)
+            # 2. UI RENDERING
             # ==========================================
-            
-            # Check the exact status field required by your rubric
             if data.get("status") == "ok":
-                
-                # --- DESERIALIZE THE RESPONSE ---
-                # Response is JSON: {"analysis": [...], "courses": [...]}
+
                 raw_response_string = data.get("response", "{}")
                 try:
                     parsed = json.loads(raw_response_string)
@@ -111,70 +205,95 @@ if run_button:
                 except json.JSONDecodeError:
                     universities = []
                     courses_list = []
-                    st.warning("Could not parse the response.")
+                    st.warning("⚠️ Could not parse the agent response.")
+
                 courses_by_university = {
                     c.get("university_name", ""): c.get("matched_courses", [])
                     for c in courses_list
                 }
                 agent_steps = data.get("steps", [])
-                
-                st.success(f"Analysis Complete! Found {len(universities)} matches.")
-                
-                # --- BUILD THE NICE TABLES ---
+
+                # ── Summary banner ──
                 if universities:
-                    uni_names = [u.get("university_name", "Unknown") for u in universities]
-                    tabs = st.tabs(uni_names)
-                    
+                    st.success(
+                        f"✅ Analysis complete! Found **{len(universities)}** matching "
+                        f"universit{'y' if len(universities) == 1 else 'ies'}."
+                    )
+                else:
+                    st.warning("No universities matched your profile. Try lowering your GPA requirement or broadening your preferences.")
+
+                # ── University tabs ──
+                if universities:
+                    uni_names = [u.get("university_name", f"University {i+1}") for i, u in enumerate(universities)]
+                    tabs = st.tabs([f"#{i+1} {n}" for i, n in enumerate(uni_names)])
+
                     for i, tab in enumerate(tabs):
                         uni = universities[i]
-                        # Accessing our Buckets
                         reqs = uni.get("requirements", {})
                         logistics = uni.get("logistics", {})
-                        
-                        with tab:
-                            st.info(uni.get("general_fit_reasoning", "No reasoning provided."))
-                            
-                            col1, col2 = st.columns([2, 1])
-                            with col1:
-                                st.markdown("#### ✅ Hard Requirements")
-                                elig_data = {
-                                    "Min GPA": reqs.get("min_gpa"),
-                                    "Erasmus?": "✅ Yes" if reqs.get("erasmus_available") else "❌ No",
-                                    "English Req": reqs.get("english_test_level", "N/A"),
-                                    "Min Semesters": reqs.get("min_semesters_completed")
-                                }
-                                st.dataframe(pd.DataFrame([elig_data]), hide_index=True)
-                                
-                            with col2:
-                                st.markdown("#### 📅 Calendar")
-                                fall = reqs.get("fall_semester", {})
-                                st.write(f"**Fall:** {fall.get('start_month')}/{fall.get('start_day')} - {fall.get('end_month')}/{fall.get('end_day')}")
-                            
-                            st.divider()
-                            st.markdown("### 🏘️ Logistics & Student Experience")
-                            
-                            l_col1, l_col2, l_col3 = st.columns(3)
-                            with l_col1:
-                                st.subheader("📚 Academic")
-                                st.write(f"**Credits:** {logistics.get('academic', {}).get('min_credits_required')} - {logistics.get('academic', {}).get('max_credits_allowed')}")
-                                with st.expander("Notes"):
-                                    st.write(logistics.get("academic", {}).get("academic_summary_notes", "N/A"))
-                            with l_col2:
-                                st.subheader("🏠 Cost & Housing")
-                                st.write(f"**Living Cost:** {logistics.get('housing_and_logistics', {}).get('estimated_living_cost_per_month')} {logistics.get('housing_and_logistics', {}).get('currency')}")
-                                with st.expander("Details"):
-                                    st.write(logistics.get("housing_and_logistics", {}).get("housing_details", "N/A"))
-                            with l_col3:
-                                st.subheader("🤝 Integration")
-                                st.write(f"**Buddy Program:** {'✅' if logistics.get('student_integration', {}).get('buddy_program_available') else '❌'}")
-                                with st.expander("Details"):
-                                    st.write(logistics.get("student_integration", {}).get("integration_summary_notes", "N/A"))
+                        acad = logistics.get("academic", {})
+                        hous = logistics.get("housing_and_logistics", {})
+                        intg = logistics.get("student_integration", {})
 
-                            # --- MATCHED COURSES ---
+                        with tab:
+                            # Fit reasoning
+                            reasoning = uni.get("general_fit_reasoning", "")
+                            if reasoning:
+                                st.info(f"💡 {reasoning}")
+
+                            st.markdown("---")
+                            st.markdown("#### 📋 Hard Requirements")
+
+                            # Metrics row
+                            m1, m2, m3, m4 = st.columns(4)
+                            m1.metric("Min GPA", reqs.get("min_gpa", "—"))
+                            m2.metric("Erasmus", "✅ Yes" if reqs.get("erasmus_available") else "❌ No")
+                            m3.metric("English Req", reqs.get("english_test_level") or "None")
+                            m4.metric("Min Semesters", reqs.get("min_semesters_completed", "—"))
+
+                            # Calendar
+                            fall = reqs.get("fall_semester", {})
+                            if fall:
+                                st.caption(
+                                    f"📅 Fall: {fall.get('start_month', '?')}/{fall.get('start_day', '?')} "
+                                    f"→ {fall.get('end_month', '?')}/{fall.get('end_day', '?')}"
+                                )
+
+                            st.markdown("---")
+                            st.markdown("#### 🏘️ Logistics & Student Experience")
+
+                            l1, l2, l3 = st.columns(3)
+
+                            with l1:
+                                st.markdown("**📚 Academic**")
+                                credits_min = acad.get("min_credits_required")
+                                credits_max = acad.get("max_credits_allowed")
+                                if credits_min is not None:
+                                    st.metric("Credits Range", f"{credits_min} – {credits_max or '?'}")
+                                with st.expander("Academic Notes"):
+                                    st.write(acad.get("academic_summary_notes") or "No notes available.")
+
+                            with l2:
+                                st.markdown("**🏠 Cost & Housing**")
+                                cost = hous.get("estimated_living_cost_per_month")
+                                currency = hous.get("currency", "")
+                                if cost:
+                                    st.metric("Living Cost / Month", f"{cost} {currency}".strip())
+                                with st.expander("Housing Details"):
+                                    st.write(hous.get("housing_details") or "No details available.")
+
+                            with l3:
+                                st.markdown("**🤝 Integration**")
+                                buddy = intg.get("buddy_program_available")
+                                st.metric("Buddy Program", "✅ Available" if buddy else "❌ Not available")
+                                with st.expander("Integration Notes"):
+                                    st.write(intg.get("integration_summary_notes") or "No notes available.")
+
+                            # Matched courses
                             matched_courses = courses_by_university.get(uni.get("university_name", ""), [])
                             if matched_courses:
-                                st.divider()
-                                st.markdown("### 📚 Matched Courses")
+                                st.markdown("---")
+                                st.markdown(f"#### 📖 Matched Courses ({len(matched_courses)})")
                                 courses_data = [
                                     {
                                         "Course": c.get("course_name", ""),
@@ -183,21 +302,46 @@ if run_button:
                                     }
                                     for c in matched_courses
                                 ]
-                                st.dataframe(pd.DataFrame(courses_data), hide_index=True, use_container_width=True)
-                                
-                # --- BUILD THE REQUIRED TRACE ---
-                st.divider()
-                st.subheader("🛠 Execution Trace")
-                for step in agent_steps:
-                    with st.expander(f"Module: {step.get('module', 'Unknown')}"):
-                        st.write("**Prompt:**")
-                        st.json(step.get("prompt", {}))
-                        st.write("**Response:**")
-                        st.json(step.get("response", {}))
-                        
-            # Handle the exact error format expected by your API requirements
+                                st.dataframe(
+                                    pd.DataFrame(courses_data),
+                                    hide_index=True,
+                                    use_container_width=True
+                                )
+
+                # Execution trace
+                st.markdown("---")
+                with st.expander(f"🛠️ Execution Trace ({len(agent_steps)} steps)", expanded=False):
+                    if agent_steps:
+                        for step in agent_steps:
+                            module = step.get("module", "Unknown")
+                            st.markdown(f"**Module: `{module}`**")
+                            c1, c2 = st.columns(2)
+                            with c1:
+                                st.caption("Prompt")
+                                st.json(step.get("prompt", {}))
+                            with c2:
+                                st.caption("Response")
+                                st.json(step.get("response", {}))
+                            st.divider()
+                    else:
+                        st.caption("No execution steps recorded.")
+
             elif data.get("status") == "error":
-                st.error(f"Agent Error: {data.get('error')}")
-                
+                st.error(f"❌ Agent Error: {data.get('error')}")
+
         except Exception as e:
-            st.error(f"System Error: {e}")
+            st.error(f"❌ System Error: {e}")
+
+# ── Empty state guidance ──
+else:
+    st.markdown("---")
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        st.markdown("#### 1️⃣ Choose a Profile")
+        st.caption("Click a **Quick Example** in the sidebar, or paste your own JSON profile into the editor.")
+    with col_b:
+        st.markdown("#### 2️⃣ Run the Agent")
+        st.caption("Hit **🔍 Run Agent** and wait ~30–90 seconds while the AI pipeline runs.")
+    with col_c:
+        st.markdown("#### 3️⃣ Explore Results")
+        st.caption("Browse university tabs, review requirements, logistics, and matched courses.")
