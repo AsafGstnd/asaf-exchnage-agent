@@ -2,9 +2,12 @@
 Tool implementations: RAG search and web search.
 These are the raw implementations; the registry wraps them with caching.
 """
+import logging
 from typing import Optional
 
 from pinecone_db.pinecone_client import query_embedding
+
+logger = logging.getLogger(__name__)
 
 
 def rag_search_tool(query: str, university: Optional[str] = None, top_k: int = 3, filter: Optional[dict] = None) -> str:
@@ -39,5 +42,9 @@ def web_search_tool(query: str, top_k: int = 3) -> str:
             return "No web results found."
         parts = [f"{r['title']}\n{r['body']}" for r in results if r.get("body")]
         return "\n---\n".join(parts) if parts else "No web results found."
+    except ImportError:
+        logger.error("duckduckgo-search not installed")
+        return "Web search unavailable: missing dependency"
     except Exception as e:
+        logger.error("Web search failed: %s", e)
         return f"Web search failed: {e}"

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import uvicorn
 import os
+import uuid
 import json
 import logging
 
@@ -19,18 +20,32 @@ app = FastAPI(
 )
 
 agent = None
+
+# PRODUCTION: strict initialization — mock fallback only in development/test mode
+ENV_MODE = os.getenv("ENV_MODE", "production").lower()
+ALLOW_MOCK = ENV_MODE in ("development", "test")
+
 try:
     from orchestration.supervisor import Supervisor as RealSupervisor
     agent = RealSupervisor()
-    logger.info("✅ Supervisor initialized successfully")
+    logger.info("✅ Supervisor initialized successfully (REAL)")
 except Exception as _init_err:
     logger.error("❌ Failed to initialize real Supervisor: %s", _init_err, exc_info=True)
-    try:
-        from orchestration.mock_supervisor import Supervisor as MockSupervisor
-        agent = MockSupervisor()
-        logger.warning("⚠️ Using MockSupervisor as fallback")
-    except Exception as _mock_err:
-        logger.error("❌ Failed to initialize MockSupervisor: %s", _mock_err, exc_info=True)
+
+    if ALLOW_MOCK:
+        logger.warning("⚠️ ENV_MODE=%s: attempting mock fallback", ENV_MODE)
+        try:
+            from orchestration.mock_supervisor import Supervisor as MockSupervisor
+            agent = MockSupervisor()
+            logger.warning("⚠️ Using MockSupervisor (development/test only)")
+        except Exception as _mock_err:
+            logger.error("❌ Failed to initialize MockSupervisor: %s", _mock_err, exc_info=True)
+            raise RuntimeError("Both real and mock supervisors failed")
+    else:
+        raise RuntimeError(
+            f"Supervisor initialization failed in {ENV_MODE} mode. "
+            "Set ENV_MODE=development or ENV_MODE=test to enable mock fallback."
+        )
 
 # ---------------- WEB UI ---------------- #
 
@@ -729,6 +744,7 @@ def serve_ui():
 
 class ExecuteRequest(BaseModel):
     prompt: str
+    session_id: Optional[str] = None
 
 
 class StepLog(BaseModel):
@@ -739,6 +755,7 @@ class StepLog(BaseModel):
 
 class ExecuteResponse(BaseModel):
     status: str
+    session_id: Optional[str] = None
     error: Optional[str] = None
     response: Optional[Any] = None
     steps: List[StepLog] = []
@@ -887,9 +904,11 @@ def execute_agent(request: ExecuteRequest):
             logger.debug("[execute] Using free-text prompt: %.100s", chat_msg)
 
         logger.debug("[execute] Invoking supervisor...")
+        session_id = request.session_id if request.session_id else str(uuid.uuid4())
         result = agent.run(
             new_chat_message=chat_msg,
-            user_profile_dict=user_profile
+            user_profile_dict=user_profile,
+            thread_id=session_id
         )
 
         analysis = result.get("analysis", [])
@@ -907,6 +926,7 @@ def execute_agent(request: ExecuteRequest):
 
         return {
             "status": "ok",
+            "session_id": session_id,
             "error": None,
             "response": response_payload,
             "steps": steps

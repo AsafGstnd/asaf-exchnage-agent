@@ -141,6 +141,10 @@ with st.sidebar:
 USE_API = use_api
 API_URL = api_url
 
+# Initialize session_id for conversation continuity
+if "session_id" not in st.session_state:
+    st.session_state.session_id = None
+
 # Initialize local agent
 if not USE_API:
     if Supervisor is None:
@@ -157,8 +161,13 @@ if run_button:
             # 1. DATA FETCHING (Local vs Server)
             # ==========================================
             if USE_API:
-                res = requests.post(f"{API_URL}/execute", json={"prompt": raw_user_str})
+                payload = {"prompt": raw_user_str}
+                if st.session_state.session_id:
+                    payload["session_id"] = st.session_state.session_id
+                res = requests.post(f"{API_URL}/execute", json=payload)
                 data = res.json()
+                if "session_id" in data:
+                    st.session_state.session_id = data["session_id"]
 
             else:
                 try:

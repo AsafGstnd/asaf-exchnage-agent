@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # 1. Define the State Schema
 class AgentState(TypedDict, total=False):
     valid_universities_list: list       # List of universities after filtering
-    user_iformation: dict               # Student profile input data
+    user_information: dict              # Student profile input data
     user_requests: List[str]            # History of user requests/messages
     top_k: int                          # Number of top universities to select
     top_universities: list              # Final ranked university names
@@ -27,14 +27,16 @@ class AgentState(TypedDict, total=False):
     universities_fit_text: List[str]    # Reasoning for university fit
     steps: List[Dict[str,Any]]                   # Execution trace of agent steps
     courses: List[dict]                          # Matched courses per university (from CourseFinder)
+    llm_call_count: int                          # Number of LLM calls made
+    estimated_tokens: int                        # Estimated token usage
 
 # 2. Define the Nodes
 def filter_node(state: AgentState):
     try:
-        filtered_result = filter_universities(state["user_iformation"])
+        filtered_result = filter_universities(state["user_information"])
         step = {
             "module": "Filter",
-            "prompt": {"action": "Query Supabase", "criteria": state["user_iformation"]},
+            "prompt": {"action": "Query Supabase", "criteria": state["user_information"]},
             "response": {"found_universities": len(filtered_result["universities"]), "traced_steps": filtered_result.get("traced_steps", [])}
         }
         logger.debug("[filter_node] Found %d universities", len(filtered_result["universities"]))
@@ -48,7 +50,7 @@ def filter_node(state: AgentState):
         logger.error("[filter_node] Error: %s", e, exc_info=True)
         step = {
             "module": "Filter",
-            "prompt": {"action": "Query Supabase", "criteria": state.get("user_iformation", {})},
+            "prompt": {"action": "Query Supabase", "criteria": state.get("user_information", {})},
             "response": {"error": str(e), "found_universities": 0}
         }
         return {
@@ -84,10 +86,12 @@ def rank_node(state: AgentState):
             "universities_fit_text": [],
             "top_universities": top_universities,
             "steps": (state.get("steps") or []) + [step],
+            "llm_call_count": state.get("llm_call_count", 0),
+            "estimated_tokens": state.get("estimated_tokens", 0),
         }
 
     try:
-        preferences = state["user_iformation"].get("preferences", {})
+        preferences = state["user_information"].get("preferences", {})
         free_language_preferences = preferences.get("free_language_preferences", "")
         llm_json_response, rank_prompt = score_universities_with_llm(
             state["valid_universities_list"],
@@ -110,6 +114,8 @@ def rank_node(state: AgentState):
             "universities_fit_text": reasonings,
             "top_universities": top_universities,
             "steps": (state.get("steps") or []) + [step],
+            "llm_call_count": state.get("llm_call_count", 0) + 1,
+            "estimated_tokens": state.get("estimated_tokens", 0) + 500,
         }
     except Exception as e:
         logger.error("[rank_node] Error: %s", e, exc_info=True)
@@ -128,28 +134,29 @@ def rank_node(state: AgentState):
 def course_finder_node(state: AgentState):
     try:
         from orchestration.specialists.course_finder import find_courses_react
-        courses = find_courses_react(
+        courses, react_steps = find_courses_react(
             state.get("top_universities", []),
-            state.get("user_iformation", {})
+            state.get("user_information", {})
         )
-        step = {
+        base_step = {
             "module": "CourseFinder",
             "prompt": {
                 "universities": state.get("top_universities", []),
-                "major": state.get("user_iformation", {}).get("academic_profile", {}).get("major"),
-                "languages": state.get("user_iformation", {}).get("language_profile", {}).get("non_english_languages", [])
+                "major": state.get("user_information", {}).get("academic_profile", {}).get("major"),
+                "languages": state.get("user_information", {}).get("language_profile", {}).get("non_english_languages", [])
             },
             "response": {"courses_found": len(courses), "courses": courses}
         }
-        logger.debug("[course_finder_node] Found %d course entries", len(courses))
-        return {"courses": courses, "steps": (state.get("steps") or []) + [step]}
+        all_steps = [base_step] + react_steps
+        logger.debug("[course_finder_node] Found %d course entries, %d react steps", len(courses), len(react_steps))
+        return {"courses": courses, "steps": (state.get("steps") or []) + all_steps}
     except Exception as e:
         logger.error("[course_finder_node] Error: %s", e, exc_info=True)
         step = {
             "module": "CourseFinder",
             "prompt": {
                 "universities": state.get("top_universities", []),
-                "major": state.get("user_iformation", {}).get("academic_profile", {}).get("major")
+                "major": state.get("user_information", {}).get("academic_profile", {}).get("major")
             },
             "response": {"error": str(e), "courses_found": 0}
         }
@@ -207,6 +214,9 @@ def _format_analysis_as_string(analysis_results: list) -> str:
     return "\n".join(parts).strip()
 
 # 3. Define the Routing Logic
+VALID_ROUTES = {"filter", "rank", "courses", "analyze"}
+DEFAULT_ROUTE = "filter"
+
 def choose_entry_point(state: AgentState) -> str:
     """
     Conversation-aware router. First turn always runs full pipeline.
@@ -215,24 +225,34 @@ def choose_entry_point(state: AgentState) -> str:
     if state.get("request_count", 1) == 1:
         return "filter"
     requests = state.get("user_requests", [])
-    user_text = str(requests[-1]) if requests else state.get("user_iformation", {}).get("free_text", "")
+    user_text = str(requests[-1]) if requests else state.get("user_information", {}).get("free_text", "")
     try:
         from utils.llmod_client import llmod_chat
         system_prompt = """You are an expert workflow router for a university exchange agent.
 Given a user's free-form input, decide which task fits best:
-- filter: New criteria, first message, or major preference change (e.g. "I want universities with strong nightlife")
-- rank: Change preferences like budget, nightlife, "show me more universities" (e.g. "Actually I prefer something cheaper", "Show me more universities")
-- courses: Find courses, computer science, language of instruction (e.g. "Find computer science courses there")
+- filter: New criteria, first message, or major preference change
+- rank: Change preferences like budget, nightlife, "show me more universities"
+- courses: Find courses, computer science, language of instruction
 - analyze: Re-analyze logistics only
 
-Respond ONLY with one word: filter, rank, courses, or analyze."""
+Respond ONLY with a valid JSON object:
+{"route": "filter|rank|courses|analyze", "reason": "brief explanation"}"""
         user_prompt = f"User input: {user_text}"
-        task = llmod_chat(system_prompt, user_prompt, use_json=False).strip().lower()
-        if task in {"filter", "rank", "courses", "analyze"}:
-            return task
-    except Exception:
-        pass
-    return "filter"
+        response = llmod_chat(system_prompt, user_prompt, use_json=True)
+        try:
+            data = json.loads(response)
+            route = data.get("route", DEFAULT_ROUTE).strip().lower()
+        except json.JSONDecodeError:
+            logger.warning("[Router] Failed to parse response as JSON: %.100s", response)
+            route = DEFAULT_ROUTE
+        if route not in VALID_ROUTES:
+            logger.warning("[Router] Invalid route '%s', using default '%s'", route, DEFAULT_ROUTE)
+            route = DEFAULT_ROUTE
+        logger.info("[Router] Selected route: %s for input: %.50s", route, user_text)
+        return route
+    except Exception as e:
+        logger.error("[Router] Error: %s, using default route", e, exc_info=True)
+    return DEFAULT_ROUTE
 
 # 4. Build the Supervisor Graph
 # Pipeline order: filter -> rank -> course_finder -> analyze (Analyzer runs last as reasoning layer)
@@ -278,7 +298,7 @@ class Supervisor:
             file_name = f"snapshot_{thread_id}_turn_{count}.json"
             file_path = output_dir / file_name
 
-            clean_state = {k: v for k, v in state_values.items() if k != "rag_factsheet_func"}
+            clean_state = dict(state_values)
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(clean_state, f, ensure_ascii=False, indent=2, default=str)
                 
@@ -300,18 +320,18 @@ class Supervisor:
             if not user_profile_dict:
                 raise ValueError("user_profile_dict is required for the first request!")
             payload = {
-                "user_iformation": user_profile_dict,   # Set the JSON profile once
+                "user_information": user_profile_dict,  # Set the JSON profile once
                 "user_requests": updated_requests,      # Will be [] if no message was passed
                 "request_count": new_count,
-                "valid_universities_list": [], 
+                "valid_universities_list": [],
                 "top_k": 5,
-                "extracted_data_dict": {},
-                "rag_factsheet_func": None,
                 "top_universities": [],
                 "analysis": [],
                 "universities_fit_text": [],
                 "steps": [],
-                "courses": []
+                "courses": [],
+                "llm_call_count": 0,
+                "estimated_tokens": 0,
             }
         else:
             payload = {
