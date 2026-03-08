@@ -4,22 +4,33 @@ import logging
 logger = logging.getLogger(__name__)
 
 def apply_academic_filters(rows, academic, traced_steps):
-    # GPA
+    """
+    Apply academic eligibility filters in Python.
+
+    NULL semantics (applies to all boolean/numeric DB fields):
+      - NULL  → "unknown / not yet extracted" → INCLUDE the university (conservative)
+      - True  → explicit confirmation           → INCLUDE
+      - False → explicit denial                 → EXCLUDE
+
+    We use `r.get("field") is not False` instead of a simple truthiness check so
+    that NULL (None) is treated as inclusive, not a rejection.
+    """
+    # GPA: NULL min_gpa means "no GPA requirement" – always include such rows.
     if academic.get("gpa") is not None:
         gpa_val = academic["gpa"]
         rows = [r for r in rows if (r.get("min_gpa") is None or r.get("min_gpa", 0) <= gpa_val)]
-        traced_steps.append(f"Filtered by min_gpa <= {gpa_val} (or no GPA requirement)")
+        traced_steps.append(f"Filtered by min_gpa <= {gpa_val} (NULL = no requirement, included)")
         print(f"[Filter Trace] Records remaining after GPA filter: {len(rows)}")
-    # Study level
+    # Study level: NULL msc_allowed means "unknown" – include conservatively rather than reject.
     if academic.get("study_level", "").strip().lower() == "msc":
-        rows = [r for r in rows if r.get("msc_allowed", False)]
-        traced_steps.append("Filtered by MSc allowed")
+        rows = [r for r in rows if r.get("msc_allowed") is not False]
+        traced_steps.append("Filtered by MSc allowed (NULL = unknown, included)")
         print(f"[Filter Trace] Records remaining after MSc filter: {len(rows)}")
     # Semesters completed
     if academic.get("semesters_completed") is not None:
         sem_val = academic["semesters_completed"]
         rows = [r for r in rows if (r.get("min_semesters_completed") is None or r.get("min_semesters_completed", 0) <= sem_val)]
-        traced_steps.append(f"Filtered by min_semesters <= {sem_val} (or no semester requirement)")
+        traced_steps.append(f"Filtered by min_semesters <= {sem_val} (NULL = no requirement, included)")
         print(f"[Filter Trace] Records remaining after Semesters filter: {len(rows)}")
     return rows
 
@@ -66,11 +77,13 @@ def apply_availability_filter(rows, availability, traced_steps):
 def apply_language_filters(rows, language, preferences, traced_steps):
     user_langs = language.get("non_english_languages", [])
     if not user_langs:
-        rows = [r for r in rows if r.get("english_only_possible", True)]
-        traced_steps.append("Filtered for English-only universities")
+        # NULL english_only_possible means "unknown" – include conservatively rather than reject.
+        rows = [r for r in rows if r.get("english_only_possible") is not False]
+        traced_steps.append("Filtered for English-only universities (NULL = unknown, included)")
     if preferences.get("must_be_erasmus") is True:
-        rows = [r for r in rows if r.get("erasmus_available", False)]
-        traced_steps.append("Filtered by Erasmus availability")
+        # NULL erasmus_available means "unknown" – include conservatively rather than reject.
+        rows = [r for r in rows if r.get("erasmus_available") is not False]
+        traced_steps.append("Filtered by Erasmus availability (NULL = unknown, included)")
     return rows
 
 def apply_english_test_filter(rows, language, traced_steps):
@@ -142,27 +155,34 @@ def filter_universities(user_input):
     availability = user_input.get("availability", {})
     preferences = user_input.get("preferences", {})
 
-    query = supabase.table("universities_requirements").select("*")
+    # Guard: Supabase client may be None if credentials are missing.
+    if supabase is None:
+        logger.error("[filter_universities] Supabase client is not initialized. Returning empty list.")
+        return {
+            "universities": [],
+            "traced_steps": ["Supabase client not initialized – check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY"]
+        }
+
     traced_steps = []
 
-    # Push hard filters into the database query
-    if academic.get("gpa") is not None:
-        gpa_val = academic["gpa"]
-        query = query.lte("min_gpa", gpa_val)
-        traced_steps.append(f"Applied DB GPA filter: min_gpa <= {gpa_val}")
+    # Fetch ALL rows from Supabase and apply every filter in Python.
+    #
+    # We deliberately avoid pushing GPA / msc_allowed / erasmus_available filters
+    # into the DB query because PostgREST's .lte()/.eq() operators silently DROP
+    # rows where the column IS NULL.  NULL in these fields means "unknown / not
+    # extracted yet", not automatic rejection.  Python-side filtering handles
+    # NULLs conservatively (see apply_* helpers above).
+    try:
+        response = supabase.table("universities_requirements").select("*").execute()
+        rows = response.data if response and hasattr(response, "data") and response.data else []
+    except Exception as e:
+        logger.error("[filter_universities] Supabase query failed: %s", e, exc_info=True)
+        return {
+            "universities": [],
+            "traced_steps": [f"Supabase query error: {e}"]
+        }
 
-    if academic.get("study_level", "").strip().lower() == "msc":
-        query = query.eq("msc_allowed", True)
-        traced_steps.append("Applied DB MSc filter")
-
-    if preferences.get("must_be_erasmus") is True:
-        query = query.eq("erasmus_available", True)
-        traced_steps.append("Applied DB Erasmus filter")
-
-    # Execute query with DB-side filters applied
-    response = query.execute()
-    rows = response.data if response and hasattr(response, "data") else []
-    logger.debug("[Filter] Retrieved %d universities after DB filters", len(rows))
+    logger.debug("[Filter] Retrieved %d universities from DB (pre-filter)", len(rows))
     print(f"\n[Filter Trace] Records retrieved from database: {len(rows)}")
 
     rows = apply_academic_filters(rows, academic, traced_steps)
