@@ -120,8 +120,8 @@ class ExecuteResponse(BaseModel):
 @app.get("/api/team_info")
 def get_team_info():
     return {
-        "group_batch_order_number": "1_1",
-        "team_name": "Fez Exchange Agent Team",
+        "group_batch_order_number": "01_01",
+        "team_name": "Fez Exchange Agent",
         "students": [
             {
                 "name": "Yam Ben Tob",
@@ -130,6 +130,10 @@ def get_team_info():
             {
                 "name": "Asaf Greenstein",
                 "email": "asaf.g@campus.technion.ac.il"
+            },
+            {
+                "name": "Anna Sakoun",
+                "email": "anna.sakoun@campus.technion.ac.il"
             }
         ]
     }
