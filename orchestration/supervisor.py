@@ -38,6 +38,8 @@ def filter_node(state: AgentState):
             "response": {"found_universities": len(filtered_result["universities"]), "traced_steps": filtered_result.get("traced_steps", [])}
         }
         logger.debug("[filter_node] Found %d universities", len(filtered_result["universities"]))
+        if not filtered_result["universities"]:
+            logger.warning("[filter_node] No universities matched the student profile – check GPA, language, availability, and Erasmus filters")
         return {
             "valid_universities_list": filtered_result["universities"],
             "steps": (state.get("steps") or []) + [step]
@@ -181,7 +183,11 @@ def analyze_node(state: AgentState):
 def _format_analysis_as_string(analysis_results: list) -> str:
     """Format analysis list into a human-readable string for API response."""
     if not analysis_results:
-        return "No universities matched your criteria."
+        return (
+            "No universities matched your criteria. "
+            "Try relaxing your filters – for example, lower the minimum GPA, "
+            "broaden your language preferences, or adjust your availability dates."
+        )
     parts = []
     for i, uni in enumerate(analysis_results, 1):
         name = uni.get("university_name", uni.get("name", "Unknown"))
