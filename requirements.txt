@@ -27,4 +27,4 @@ pydantic
 pytest
 
 # Web search (CourseFinder ReAct tool)
-ddgs
+duckduckgo-search

@@ -1,4 +1,7 @@
 from utils.config import supabase
+import logging
+
+logger = logging.getLogger(__name__)
 
 def apply_academic_filters(rows, academic, traced_steps):
     # GPA
@@ -142,9 +145,24 @@ def filter_universities(user_input):
     query = supabase.table("universities_requirements").select("*")
     traced_steps = []
 
-    # Execute query
+    # Push hard filters into the database query
+    if academic.get("gpa") is not None:
+        gpa_val = academic["gpa"]
+        query = query.lte("min_gpa", gpa_val)
+        traced_steps.append(f"Applied DB GPA filter: min_gpa <= {gpa_val}")
+
+    if academic.get("study_level", "").strip().lower() == "msc":
+        query = query.eq("msc_allowed", True)
+        traced_steps.append("Applied DB MSc filter")
+
+    if preferences.get("must_be_erasmus") is True:
+        query = query.eq("erasmus_available", True)
+        traced_steps.append("Applied DB Erasmus filter")
+
+    # Execute query with DB-side filters applied
     response = query.execute()
     rows = response.data if response and hasattr(response, "data") else []
+    logger.debug("[Filter] Retrieved %d universities after DB filters", len(rows))
     print(f"\n[Filter Trace] Records retrieved from database: {len(rows)}")
 
     rows = apply_academic_filters(rows, academic, traced_steps)
