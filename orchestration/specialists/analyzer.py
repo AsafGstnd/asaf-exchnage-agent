@@ -1,7 +1,11 @@
 import json
+import logging
 from tools.registry import rag_search
 from utils.config import supabase
 from utils.llmod_client import llmod_chat
+from utils.normalize import normalize_university_name
+
+logger = logging.getLogger(__name__)
 
 # Limit RAG chunks for efficiency
 RAG_TOP_K = 2
@@ -113,9 +117,19 @@ def analyze_universities(top_universities, universities_fit_text=None, courses=N
         {context_text}
         ---"""
 
-        # Call your LLM, ensuring it returns JSON
-        extracted_logistics_json = llmod_chat(system_prompt, user_prompt, use_json=True)
-        logistics_and_experience_dict = json.loads(extracted_logistics_json)
+        # Call the LLM, ensuring it returns JSON.
+        # If the LLM call or JSON parsing fails, continue with an empty dict so
+        # the rest of the pipeline can still proceed with partial data.
+        logistics_and_experience_dict = {}
+        try:
+            extracted_logistics_json = llmod_chat(system_prompt, user_prompt, use_json=True)
+            logistics_and_experience_dict = json.loads(extracted_logistics_json)
+        except Exception as llm_err:
+            logger.warning(
+                "[Analyzer] LLM extraction failed for '%s': %s – continuing with empty logistics",
+                uni_name, llm_err
+            )
+
         if return_steps:
             steps.append({
                 "module": "Analyzer",
@@ -123,9 +137,43 @@ def analyze_universities(top_universities, universities_fit_text=None, courses=N
                 "response": logistics_and_experience_dict
             })
 
-        # Query Supabase for requirements for this university (column is "name", not "university")
-        supa_resp = supabase.table("universities_requirements").select("*").eq("name", uni_name).execute()
-        eligibility_and_framework = supa_resp.data[0] if supa_resp and hasattr(supa_resp, 'data') and supa_resp.data else {}
+        # Query Supabase for requirements for this university.
+        # Use exact match first; fall back to normalized name comparison so that
+        # minor spacing/casing differences don't silently drop enrichment data.
+        eligibility_and_framework = {}
+        if supabase is not None:
+            try:
+                supa_resp = supabase.table("universities_requirements").select("*").eq("name", uni_name).execute()
+                if supa_resp and hasattr(supa_resp, "data") and supa_resp.data:
+                    eligibility_and_framework = supa_resp.data[0]
+                else:
+                    # Exact match returned nothing – try normalized fallback by fetching
+                    # all names and comparing after normalization.
+                    norm_target = normalize_university_name(uni_name)
+                    all_resp = supabase.table("universities_requirements").select("name").execute()
+                    if all_resp and hasattr(all_resp, "data") and all_resp.data:
+                        for row in all_resp.data:
+                            if normalize_university_name(row.get("name", "")) == norm_target:
+                                full_resp = supabase.table("universities_requirements").select("*").eq("name", row["name"]).execute()
+                                if full_resp and hasattr(full_resp, "data") and full_resp.data:
+                                    eligibility_and_framework = full_resp.data[0]
+                                    logger.info(
+                                        "[Analyzer] Normalized fallback matched '%s' -> '%s'",
+                                        uni_name, row["name"]
+                                    )
+                                break
+                    if not eligibility_and_framework:
+                        logger.info(
+                            "[Analyzer] No Supabase requirements found for '%s' (exact or normalized) – using empty dict",
+                            uni_name
+                        )
+            except Exception as supa_err:
+                logger.warning(
+                    "[Analyzer] Supabase enrichment failed for '%s': %s – continuing with empty requirements",
+                    uni_name, supa_err
+                )
+        else:
+            logger.warning("[Analyzer] Supabase client not initialized – skipping requirements enrichment for '%s'", uni_name)
 
         matched_courses = _get_courses_for_university(courses or [], uni_name)
 

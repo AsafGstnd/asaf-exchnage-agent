@@ -866,11 +866,16 @@ def get_agent_info():
 
 @app.get("/api/model_architecture")
 def get_architecture():
-
     base = os.path.dirname(os.path.abspath(__file__))
 
-    for name in ("architecture.png", "architecture_placeholder.png"):
-        file_path = os.path.join(base, "..", name)
+    # Check locations in priority order.
+    # docs/architecture.png is the canonical stable path per architecture guidelines.
+    for rel_path in (
+        os.path.join("..", "docs", "architecture.png"),
+        os.path.join("..", "architecture.png"),
+        os.path.join("..", "architecture_placeholder.png"),
+    ):
+        file_path = os.path.join(base, rel_path)
 
         if os.path.exists(file_path):
             return FileResponse(file_path, media_type="image/png")
