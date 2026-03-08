@@ -8,7 +8,7 @@ API_URL = os.getenv("API_URL", "http://localhost:8000/api")
 st.set_page_config(page_title="Exchange Agent Demo", layout="wide")
 st.title("🎓 University Exchange AI")
 
-default_prompt = '{"academic_profile": {"gpa": 85}, "preferences": {"vibe": "party"}}'
+default_prompt = '{"academic_profile": {"gpa": 3.2}, "preferences": {"vibe": "party"}}'
 prompt = st.text_area("Enter Request (JSON format):", value=default_prompt, height=150)
 
 if st.button("Run Agent"):

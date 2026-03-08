@@ -41,19 +41,19 @@ st.markdown('</div>', unsafe_allow_html=True)
 # ── Pre-built example profiles ──
 EXAMPLE_PROFILES = {
     "💻 CS + Nightlife": {
-        "academic_profile": {"gpa": 85, "major": "Computer Science"},
+        "academic_profile": {"gpa": 3.2, "major": "Computer Science"},
         "preferences": {"free_language_preferences": "nightlife, party vibe, easy to make friends"}
     },
     "📊 Business + Budget": {
-        "academic_profile": {"gpa": 80, "major": "Business Administration"},
+        "academic_profile": {"gpa": 3.0, "major": "Business Administration"},
         "preferences": {"free_language_preferences": "affordable, low cost of living, budget friendly"}
     },
     "⚙️ Engineering + Culture": {
-        "academic_profile": {"gpa": 78, "major": "Electrical Engineering"},
+        "academic_profile": {"gpa": 2.9, "major": "Electrical Engineering"},
         "preferences": {"free_language_preferences": "culture, history, museums, beautiful city"}
     },
     "🌍 CS + English-only": {
-        "academic_profile": {"gpa": 82, "major": "Computer Science"},
+        "academic_profile": {"gpa": 3.1, "major": "Computer Science"},
         "preferences": {"free_language_preferences": "English spoken environment, international community"},
         "language_profile": {"english_only": True}
     },
@@ -107,7 +107,7 @@ with st.sidebar:
         value=st.session_state.get("profile_text", default_profile),
         height=360,
         label_visibility="collapsed",
-        placeholder='{"academic_profile": {"gpa": 85, "major": "Computer Science"}, ...}'
+        placeholder='{"academic_profile": {"gpa": 3.2, "major": "Computer Science"}, ...}'
     )
 
     with st.expander("📖 JSON Format Guide"):
@@ -115,7 +115,7 @@ with st.sidebar:
 ```json
 {
   "academic_profile": {
-    "gpa": 85,
+    "gpa": 3.2,
     "major": "Computer Science"
   },
   "preferences": {
@@ -131,7 +131,7 @@ with st.sidebar:
 }
 ```
 **Key fields:**
-- `gpa` — score on **0–100** scale
+- `gpa` — score on **0.0–4.0** scale (USA standard)
 - `major` — your field of study
 - `free_language_preferences` — lifestyle keywords
         """)

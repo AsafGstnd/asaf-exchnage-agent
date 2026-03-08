@@ -465,19 +465,19 @@ UI_HTML = """
     <div class="examples-grid">
       <button class="example-btn" onclick="loadExample('cs_nightlife')">
         <strong>💻 CS + Nightlife</strong>
-        <em>Computer Science, GPA 85, party vibe</em>
+        <em>Computer Science, GPA 3.2, party vibe</em>
       </button>
       <button class="example-btn" onclick="loadExample('business_budget')">
         <strong>📊 Business + Budget</strong>
-        <em>Business, GPA 80, affordable cities</em>
+        <em>Business, GPA 3.0, affordable cities</em>
       </button>
       <button class="example-btn" onclick="loadExample('engineering_culture')">
         <strong>⚙️ Engineering + Culture</strong>
-        <em>Electrical Eng., GPA 78, culture & history</em>
+        <em>Electrical Eng., GPA 2.9, culture & history</em>
       </button>
       <button class="example-btn" onclick="loadExample('cs_english')">
         <strong>🌍 CS + English-only</strong>
-        <em>Computer Science, GPA 82, English courses</em>
+        <em>Computer Science, GPA 3.1, English courses</em>
       </button>
     </div>
   </div>
@@ -485,8 +485,8 @@ UI_HTML = """
   <div class="card">
     <div class="card-title"><span>✏️</span> Your Profile</div>
     <p class="input-label">Paste a JSON profile or type a free-text message (e.g. "show me something cheaper"):</p>
-    <textarea id="prompt" placeholder='{"academic_profile":{"gpa":85,"major":"Computer Science"},"preferences":{"free_language_preferences":"nightlife, affordable"}}'>{"academic_profile":{"gpa":85,"major":"Computer Science"},"preferences":{"free_language_preferences":"nightlife, affordable"}}</textarea>
-    <p class="hint">💡 Tip: Use <strong>gpa</strong> (0–100 scale), <strong>major</strong>, and <strong>free_language_preferences</strong> for best results. Follow-ups like "show more" or "find something cheaper" also work.</p>
+    <textarea id="prompt" placeholder='{"academic_profile":{"gpa":3.2,"major":"Computer Science"},"preferences":{"free_language_preferences":"nightlife, affordable"}}'>{"academic_profile":{"gpa":3.2,"major":"Computer Science"},"preferences":{"free_language_preferences":"nightlife, affordable"}}</textarea>
+    <p class="hint">💡 Tip: Use <strong>gpa</strong> (0.0–4.0 scale), <strong>major</strong>, and <strong>free_language_preferences</strong> for best results. Follow-ups like "show more" or "find something cheaper" also work.</p>
     <button class="run-btn" id="runBtn" onclick="runAgent()">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       Run Agent
@@ -505,19 +505,19 @@ UI_HTML = """
 <script>
 const EXAMPLES = {
   cs_nightlife: JSON.stringify({
-    academic_profile: { gpa: 85, major: "Computer Science" },
+    academic_profile: { gpa: 3.2, major: "Computer Science" },
     preferences: { free_language_preferences: "nightlife, party vibe, easy to make friends" }
   }, null, 2),
   business_budget: JSON.stringify({
-    academic_profile: { gpa: 80, major: "Business Administration" },
+    academic_profile: { gpa: 3.0, major: "Business Administration" },
     preferences: { free_language_preferences: "affordable, low cost of living, budget friendly" }
   }, null, 2),
   engineering_culture: JSON.stringify({
-    academic_profile: { gpa: 78, major: "Electrical Engineering" },
+    academic_profile: { gpa: 2.9, major: "Electrical Engineering" },
     preferences: { free_language_preferences: "culture, history, museums, beautiful city" }
   }, null, 2),
   cs_english: JSON.stringify({
-    academic_profile: { gpa: 82, major: "Computer Science" },
+    academic_profile: { gpa: 3.1, major: "Computer Science" },
     preferences: { free_language_preferences: "English spoken environment, international community" },
     language_profile: { english_only: true }
   }, null, 2)
@@ -776,12 +776,12 @@ def get_agent_info():
         "purpose": "Filters universities by academic/language/availability criteria, ranks by preferences, finds courses, and analyzes top matches for logistics and fit. Supports follow-up prompts such as 'show more', 'find courses', or 'something cheaper'.",
 
         "prompt_template": {
-            "template": '{"academic_profile":{"gpa":85,"major":"Computer Science"},"preferences":{"free_language_preferences":"social scene, party vibe"},"language_profile":{},"availability":{}}'
+            "template": '{"academic_profile":{"gpa":3.2,"major":"Computer Science"},"preferences":{"free_language_preferences":"social scene, party vibe"},"language_profile":{},"availability":{}}'
         },
 
         "prompt_examples": [
             {
-                "prompt": '{"academic_profile":{"gpa":85},"preferences":{"free_language_preferences":"party vibe, easy to make friends"}}',
+                "prompt": '{"academic_profile":{"gpa":3.2},"preferences":{"free_language_preferences":"party vibe, easy to make friends"}}',
 
                 "full_response": "The agent recommends universities such as CTU Prague, DTU, and Politecnico di Milano because they combine strong computer science programs with vibrant student life.",
 
