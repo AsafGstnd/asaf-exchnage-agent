@@ -86,6 +86,8 @@ def rank_node(state: AgentState):
             "universities_fit_text": [],
             "top_universities": top_universities,
             "steps": (state.get("steps") or []) + [step],
+            "llm_call_count": state.get("llm_call_count", 0),
+            "estimated_tokens": state.get("estimated_tokens", 0),
         }
 
     try:
@@ -112,6 +114,8 @@ def rank_node(state: AgentState):
             "universities_fit_text": reasonings,
             "top_universities": top_universities,
             "steps": (state.get("steps") or []) + [step],
+            "llm_call_count": state.get("llm_call_count", 0) + 1,
+            "estimated_tokens": state.get("estimated_tokens", 0) + 500,
         }
     except Exception as e:
         logger.error("[rank_node] Error: %s", e, exc_info=True)

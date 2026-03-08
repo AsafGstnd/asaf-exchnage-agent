@@ -66,7 +66,6 @@ def _react_loop(system_prompt: str, user_prompt: str, max_iter: int = 4, log_ste
             log_steps.append({
                 "module": "CourseFinder_Tool",
                 "iteration": iteration + 1,
-                "tool_name": tool_name,
                 "prompt": {"tool": tool_name, "args": args},
                 "response": {"observation": observation[:300]}
             })

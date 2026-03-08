@@ -207,13 +207,16 @@ class TestReactLoop:
 
     def test_react_loop_with_tool_calls(self):
         """Test that ReAct loop correctly invokes tools and returns result."""
-        with patch("orchestration.specialists.course_finder.llmod_chat") as mock_llm:
+        mock_tool = MagicMock(return_value="MIT CS course info")
+        with patch("orchestration.specialists.course_finder.llmod_chat") as mock_llm, \
+             patch.dict("orchestration.specialists.course_finder.TOOLS", {"search_web": mock_tool}):
             mock_llm.side_effect = [
                 'Action: search_web | Args: {"query": "MIT CS courses"}',
                 f'Final Answer: {VALID_COURSES_JSON}'
             ]
             result = _react_loop("system", "user prompt")
         assert "universities" in result
+        mock_tool.assert_called_once_with(query="MIT CS courses")
 
     def test_react_loop_logging(self):
         """Test that ReAct steps are logged into log_steps."""

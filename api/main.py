@@ -44,7 +44,7 @@ except Exception as _init_err:
     else:
         raise RuntimeError(
             f"Supervisor initialization failed in {ENV_MODE} mode. "
-            "Set ENV_MODE=development to enable mock fallback."
+            "Set ENV_MODE=development or ENV_MODE=test to enable mock fallback."
         )
 
 # ---------------- WEB UI ---------------- #
