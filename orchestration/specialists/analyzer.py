@@ -15,6 +15,7 @@ def gather_context_for_llm(university: str) -> str:
     """
     Gathers context for a university using cached RAG search.
     Runs topic-specific queries via the central tool registry.
+    Returns empty context gracefully if Pinecone/RAG is unavailable.
     """
     search_queries = [
         "academic requirements, credit system, ECTS, course load, grading scale, teaching methodology, prerequisites",
@@ -24,12 +25,24 @@ def gather_context_for_llm(university: str) -> str:
     ]
 
     master_context_blocks = []
-    for query in search_queries:
-        text = rag_search(query=query, university=university, top_k=RAG_TOP_K)
-        if text and text != "No relevant information found in factsheets.":
-            master_context_blocks.append(text)
+    try:
+        for query in search_queries:
+            text = rag_search(query=query, university=university, top_k=RAG_TOP_K)
+            if text and text not in (
+                "No relevant information found in factsheets.",
+                "RAG/Pinecone unavailable",
+                "RAG/Pinecone search failed",
+            ):
+                master_context_blocks.append(text)
+        if master_context_blocks:
+            logger.info("[Analyzer] RAG search succeeded for %s", university)
+        else:
+            logger.info("[Analyzer] RAG context empty for %s (no matching chunks or Pinecone unavailable)", university)
+    except Exception as e:
+        logger.warning("[Analyzer] RAG search unavailable for %s: %s", university, str(e)[:100])
+        # Continue without RAG context—do not crash
 
-    return "\n\n--- NEXT CHUNK ---\n\n".join(master_context_blocks) if master_context_blocks else "No context found."
+    return "\n\n--- NEXT CHUNK ---\n\n".join(master_context_blocks) if master_context_blocks else "No RAG context available."
 
 
 def _get_courses_for_university(courses_list: list, university_name: str) -> list:
@@ -112,7 +125,7 @@ def analyze_universities(top_universities, universities_fit_text=None, courses=N
 
         TARGET UNIVERSITY: {uni_name}
 
-        CONTEXT FROM FACTSHEETS:
+        CONTEXT FROM FACTSHEETS (may be empty if RAG unavailable):
         ---
         {context_text}
         ---"""

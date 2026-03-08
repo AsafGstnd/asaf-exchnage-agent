@@ -5,8 +5,6 @@ These are the raw implementations; the registry wraps them with caching.
 import logging
 from typing import Optional
 
-from pinecone_db.pinecone_client import query_embedding
-
 logger = logging.getLogger(__name__)
 
 
@@ -15,18 +13,29 @@ def rag_search_tool(query: str, university: Optional[str] = None, top_k: int = 3
     Search Pinecone factsheets for course/department info.
     If university is provided, filter by it.
     Returns concatenated text from matching chunks.
+    Returns a descriptive message if Pinecone is not configured or unavailable.
     """
-    filter_dict = filter or {}
-    if university:
-        filter_dict = {**filter_dict, "university": {"$eq": university}}
+    try:
+        from pinecone_db.pinecone_client import query_embedding
+    except ImportError:
+        logger.warning("[RAG] Pinecone client not available (import error)")
+        return "RAG/Pinecone unavailable"
 
-    results = query_embedding(query, top_k=top_k, filter=filter_dict or None)
-    texts = [
-        r.get("metadata", {}).get("text", "")
-        for r in results
-        if r.get("metadata", {}).get("text")
-    ]
-    return "\n---\n".join(texts) if texts else "No relevant information found in factsheets."
+    try:
+        filter_dict = filter or {}
+        if university:
+            filter_dict = {**filter_dict, "university": {"$eq": university}}
+
+        results = query_embedding(query, top_k=top_k, filter=filter_dict or None)
+        texts = [
+            r.get("metadata", {}).get("text", "")
+            for r in results
+            if r.get("metadata", {}).get("text")
+        ]
+        return "\n---\n".join(texts) if texts else "No relevant information found in factsheets."
+    except Exception as e:
+        logger.warning("[RAG] Search failed: %s", str(e)[:100])
+        return "RAG/Pinecone search failed"
 
 
 def web_search_tool(query: str, top_k: int = 3) -> str:
